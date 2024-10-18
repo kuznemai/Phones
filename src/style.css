@@ -1,0 +1,20 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body{
+  background-color: navajowhite;
+}
+
+.button_addtocart {
+  width: 104px;
+  height: 36px;
+  border: 1px solid #a6a6a6;
+  border-radius: 8px;
+  color: white;
+  background-color: #66b666;
+  font-size: 18px;
+  color: white;
+}
