@@ -1,17 +1,8 @@
 
 <script setup>
-import {computed} from "vue";
 import {createdCartStore} from "../store.js";
 
 const cartStore = createdCartStore()
-
-const props = defineProps({
-  cart: Array
-});
-
-// const totalPrice = computed((item) => {
-//   return props.cart.reduce((acc, item) => acc + (item.price * item.quantity), 0)
-// })
 </script>
 
 <template>

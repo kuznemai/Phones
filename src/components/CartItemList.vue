@@ -10,11 +10,12 @@ const cartStore = createdCartStore()
 
 <template>
   <div class="flex flex-col flex-1 gap-4" v-auto-animate>
-    <CartItem v-for="item in cartStore.cart"
-              :key="item.id"
-              :title="item.title"
-              :price="item.price"
-              :image-url="item.imageUrl"
+    <CartItem v-for="item in cartStore.getAllItemsInCart"
+              :item="item"
+              :key="item.product.id"
+              :title="item.product.title"
+              :price="item.product.price"
+              :image-url="item.product.imageUrl"
               :quantity="item.quantity"
               @removeItemFromCart="() => cartStore.removeItemFromCart"
     />

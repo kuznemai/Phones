@@ -119,7 +119,20 @@ const fetchFavorites = async () => {
 // const totalPrice = computed(() => {
 //   return cart.value.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 // });
-onBeforeMount( () => {
+onBeforeMount(  async () => {
+  const params = {
+    sortBy: filters.sortBy
+  }
+
+  const {data} = await axios.get(`https://ad59c37a99f145f4.mokky.dev/items`, {params});
+  items.value = data.map((obj) => ({
+    ...obj,
+    isFavorite: false
+  }));
+
+  data.forEach(product => {
+    cartStore.addProduct(product)
+  })
 });
 
 onMounted(async () => {
@@ -161,7 +174,6 @@ provide('cart', {
     </div>
 
     <CardList
-        :items="items"
         :cart="cart"
         :addItemToCart="cartStore.addItemToCart"
         :remove-item-from-cart="cartStore.removeItemFromCart"

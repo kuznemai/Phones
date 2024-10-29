@@ -7,6 +7,7 @@ const cartStore = createdCartStore()
 const emit = defineEmits(['removeItemFromCart']);
 
 const props = defineProps({
+  item: Object,
   id: Number,
   imageUrl: String,
   title: String,
@@ -31,7 +32,7 @@ const props = defineProps({
         </div>
 
         <div class="flex items-center space-x-2 border-solid border-2 border-gray-200 rounded-lg ">
-          <Buttons :counter="props.counter"/>
+          <Buttons :id="item.product.id"/>
 <!--          <button type="button" class="minus bg-gray-200 hover:bg-gray-300 transition text-gray-800 px-2 py-1">- -->
 <!--          </button>-->
 <!--          <span class="counter text-lg">{{ quantity }}</span>-->
@@ -40,7 +41,7 @@ const props = defineProps({
 
         <div>
           <img
-              @click="emit('removeItemFromCart')"
+              @click="cartStore.addItemToCart(item.product.id, -cartStore.getCount(item.product.id))"
               src="/close.svg"
               alt="Delete"
               class="cursor-pointer opacity-60 hover:opacity-100 transition ml-50"/>
