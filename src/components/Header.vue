@@ -1,7 +1,12 @@
 <script setup>
+import Cart from "./Cart.vue";
+
 defineProps({
-  totalPrice: Number
+  totalPrice: Number,
+  cart: Array
 })
+
+const emit = defineEmits(['openDrawer', 'closeDrawer'])
 </script>
 
 <template>
@@ -15,10 +20,7 @@ defineProps({
     </div>
 
     <ul class="flex items-center gap-8">
-      <li class="flex items-center gap-3 cursor-pointer text-gray-500 hover:text-black transition">
-        <img src="/cart.svg" alt="Cart"/>
-        <span>{{ totalPrice }} $</span>
-      </li>
+      <Cart :cart="cart" @click="() => emit('openDrawer')"/>
       <li class="flex items-center gap-3 cursor-pointer text-gray-500 hover:text-black transition">
         <img src="/heart.svg" alt="Like"/>
         <span>Favorites</span>
