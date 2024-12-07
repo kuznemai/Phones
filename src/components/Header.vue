@@ -3,7 +3,7 @@ import Cart from "./Cart.vue";
 
 defineProps({
   totalPrice: Number,
-  cart: Array,
+  // cart: Array,
 });
 
 const emit = defineEmits(["openDrawer", "closeDrawer"]);
@@ -22,7 +22,8 @@ const emit = defineEmits(["openDrawer", "closeDrawer"]);
     </router-link>
 
     <ul class="flex items-center gap-8">
-      <Cart :cart="cart" @click="() => emit('openDrawer')" />
+      <!--      :cart="cart"-->
+      <Cart @click="() => emit('openDrawer')" />
       <router-link to="/favorites">
         <li
           class="flex items-center gap-3 cursor-pointer text-gray-500 hover:text-black transition"

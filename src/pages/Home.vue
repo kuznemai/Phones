@@ -147,11 +147,9 @@ onMounted(async () => {
       />
     </div>
   </div>
-
+  <!--  :cart="cart"-->
   <CardList
-    :cart="cart"
-    :addItemToCart="productStore.addProductToCart"
-    :isFavorite="items.isFavorite"
+    :add-item-to-cart="productStore.addProductToCart"
     @add-to-favorite="addToFavorite"
   />
 </template>

@@ -8,10 +8,11 @@ import { useProductStore } from "../store2.js";
 const props = defineProps({
   item: Object,
   isFavorite: Boolean,
-  onClickFavorite: Function,
+  // onClickFavorite: Function,
 });
 console.log(props.item);
 
+const emit = defineEmits(["addToFavorite"]);
 // Состояния
 // const inCart = ref(false);
 // const counter = ref(0);
@@ -60,12 +61,12 @@ const productStore = useProductStore();
   <div
     class="flex flex-col justify-between relative bg-white border border-slate-100 rounded-3xl p-4 cursor-pointer hover:-translate-y-2 hover:shadow-xl transition"
   >
+    <!--    v-if="onClickFavorite"-->
     <img
-      v-if="onClickFavorite"
       :src="!isFavorite ? '/like-1.svg' : '/like-2.svg'"
       class="absolute top-4 left-4"
       alt="Like"
-      @click="onClickFavorite"
+      @click="emit('addToFavorite', item)"
     />
 
     <img :src="item.imageUrl" class="w-20 mx-auto my-5 py-2" alt="Product" />

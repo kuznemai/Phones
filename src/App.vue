@@ -31,9 +31,9 @@ const openDrawer = () => {
 // const removeItemFromCart = (item) => {
 //   cart.value.splice(cart.value.indexOf(item), 1);
 // };
-const totalPrice = computed(() => {
-  return cart.value.reduce((acc, item) => acc + item.price * item.quantity, 0);
-});
+// const totalPrice = computed(() => {
+//   return cart.value.reduce((acc, item) => acc + item.price * item.quantity, 0);
+// });
 
 provide("cart", {
   closeDrawer,
@@ -43,12 +43,10 @@ provide("cart", {
 
 <template>
   <div class="bg-white w-4/5 m-auto rounded-xl shadow-xl mt-14">
-    <Drawer
-      v-if="drawerOpen"
-      :cart="cart"
-      :totalPrice="productStore.getTheTotalPrice"
-    />
-    <Header @openDrawer="openDrawer" :cart="cart" />
+    <!--    :cart="cart"-->
+    <Drawer v-if="drawerOpen" :totalPrice="productStore.getTheTotalPrice" />
+    <!--    :cart="cart"-->
+    <Header @openDrawer="openDrawer" />
 
     <div class="flex justify-end items-center mt-5 mr-5"></div>
     <!--    <Home />-->

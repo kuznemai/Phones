@@ -2,14 +2,13 @@
 import Card from "./Card.vue";
 // import {createdCartStore} from "../store.js";
 import { useProductStore } from "../store2.js";
-
+// removeItemFromCart: Function,
+// addItemToCart: Function,
 defineProps({
   items: Array,
-  addItemToCart: Function,
-  removeItemFromCart: Function,
+
   onClickFavorite: Function,
-  cart: Array,
-  isFavorites: Boolean,
+  // cart: Array,
 });
 
 // const cartStore2 = createdCartStore()
@@ -17,20 +16,23 @@ defineProps({
 const productStore = useProductStore();
 
 // const items = computed(() => cartStore.getAllProducts);
-
 const emit = defineEmits(["addToFavorite"]);
+
+const addToFavorite = (item) => {
+  emit("addToFavorite", item);
+};
 </script>
 
 <template>
   <div class="grid grid-cols-4 gap-5 p-10">
+    <!--    :cart="cart"-->
+    <!--    :removeItemFromCart="removeItemFromCart"-->
     <Card
       v-for="item in productStore.getAllProducts"
       :key="item.id"
       :item="item"
       :is-favorite="item.isFavorite"
-      :onClickFavorite="isFavorites ? null : () => emit('addToFavorite', item)"
-      :removeItemFromCart="removeItemFromCart"
-      :cart="cart"
+      @add-to-favorite="addToFavorite"
     />
   </div>
 </template>

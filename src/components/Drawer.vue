@@ -7,7 +7,7 @@ import { useProductStore } from "../store2.js";
 const cartStore = useProductStore();
 
 const props = defineProps({
-  cart: Array,
+  // cart: Array,
   totalPrice: Number,
 });
 </script>
@@ -15,12 +15,14 @@ const props = defineProps({
 <template>
   <div class="fixed top-0 left-0 h-full w-full bg-black z-10 opacity-70"></div>
   <div class="bg-white w-96 h-full fixed right-0 top-0 z-20 p-8">
-    <DrawerHead :cart="cart" />
+    <!--    :cart="cart"-->
+    <DrawerHead />
 
     <div class="flex h-10 items-center"></div>
 
     <div>
-      <CartItemList :cart="cart" />
+      <!--      :cart="cart"-->
+      <CartItemList />
 
       <div class="flex flex-col gap-2 mt-10">
         <div class="flex gap-2">
