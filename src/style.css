@@ -5,7 +5,7 @@
 
 
 body{
-  background-color: navajowhite;
+  background-color: #ffffff;
 }
 
 .button_addtocart {
@@ -16,5 +16,4 @@ body{
   color: white;
   background-color: #66b666;
   font-size: 18px;
-  color: white;
 }
