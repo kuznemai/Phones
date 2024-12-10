@@ -35,10 +35,6 @@ const props = defineProps({
           class="flex items-center space-x-2 border-solid border-2 border-gray-200 rounded-lg"
         >
           <Buttons :id="item.id" />
-          <!--          <button type="button" class="minus bg-gray-200 hover:bg-gray-300 transition text-gray-800 px-2 py-1">- -->
-          <!--          </button>-->
-          <!--          <span class="counter text-lg">{{ quantity }}</span>-->
-          <!--          <button type="button" class="plus bg-gray-200 hover:bg-gray-300 transition text-gray-800 px-2 py-1">+</button>-->
         </div>
 
         <div>

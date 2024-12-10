@@ -29,11 +29,6 @@ export const useProductStore = defineStore("productStore", {
         }
       }
     },
-
-    // deleteProductFromCart(id, quantity) {
-    //   if(item.quantity <= 0) {
-    //       this.cart.splice(this.cart.indexOf(item.id), 1);
-    //   }
   },
   getters: {
     getAllProducts: (state) => {
@@ -68,24 +63,3 @@ export const useProductStore = defineStore("productStore", {
     },
   },
 });
-
-// let arr = [1, 1, 1, 2, 2, 3, 4, 4, 4, 4, 72]
-// let res = [];//[{1: 'even'},{}]
-// let counter = 0;
-// for (let i = 0; i < arr.length; i++) {
-//
-//     const current = arr[i];
-//     const next = arr[i + 1];
-//     if (current === next) {
-//         ++counter;
-//     } else {
-//         ++counter;
-//         if (counter % 2 === 0) {
-//             res.push({[current]: 'even'});
-//         } else {
-//             res.push({[current]: 'odd'});
-//         }
-//         counter = 0;
-//     }
-// }
-// console.log(res)

@@ -2,59 +2,17 @@
 import { defineProps } from "vue";
 
 import Buttons from "./Buttons.vue";
-// import {createdCartStore} from "../store.js";
 import { useProductStore } from "../store2.js";
 
 const props = defineProps({
   item: Object,
   isFavorite: Boolean,
-  // onClickFavorite: Function,
 });
 console.log(props.item);
 
 const emit = defineEmits(["addToFavorite"]);
-// Состояния
-// const inCart = ref(false);
-// const counter = ref(0);
-//
-
-// const pressBuy = () => {
-//   inCart.value = true;
-//   // addItem(props.item);
-// };
-
-// const cartStore = createdCartStore()
 
 const productStore = useProductStore();
-
-// Добавление товара в корзину
-// const addItem = (item) => {
-//   const existingItem = props.cart.find(product => product.id === item.id);
-//   if (existingItem) {
-//     existingItem.quantity++;
-//   } else {
-//     item.quantity = 1;
-//     props.addItemToCart(item);
-//   }
-//   counter.value++;
-// };
-//
-// // Удаление товара
-// const removeItem = (item) => {
-//   if (counter.value > 0) {
-//     const existingItem = props.cart.find(product => product.id === item.id);
-//     if (existingItem) {
-//       existingItem.quantity--;
-//       if (existingItem.quantity <= 0) {
-//         props.removeItemFromCart(existingItem);
-//       }
-//     }
-//     counter.value--;
-//     if (counter.value === 0) {
-//       inCart.value = false;
-//     }
-//   }
-// };
 </script>
 
 <template>
@@ -84,9 +42,6 @@ const productStore = useProductStore();
             class="flex items-center space-x-3 border-solid border-2 border-gray-200 rounded-lg mr-8"
           >
             <Buttons :id="item.id" />
-            <!--            <button type="button" @click="removeItem(props.item)" class="minus bg-gray-200 hover:bg-gray-300 transition text-gray-800 px-3 py-1">-</button>-->
-            <!--            <span class="counter text-lg">{{ counter }}</span>-->
-            <!--            <button type="button" @click="addItem(props.item)" class="plus bg-gray-200 hover:bg-gray-300 transition text-gray-800 px-3 py-1">+</button>-->
           </div>
         </div>
         <button

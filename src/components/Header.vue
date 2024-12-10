@@ -1,12 +1,12 @@
 <script setup>
 import Cart from "./Cart.vue";
 
-defineProps({
-  totalPrice: Number,
-  // cart: Array,
-});
+// defineProps({
+//   // totalPrice: Number,
+//   // cart: Array,
+// });
 
-const emit = defineEmits(["openDrawer", "closeDrawer"]);
+const emit = defineEmits(["openDrawer", "closeDrawer"]); //closeDrawer можно убрать?
 </script>
 
 <template>

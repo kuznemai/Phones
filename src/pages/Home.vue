@@ -7,7 +7,7 @@ import { useProductStore } from "../store2.js";
 const productStore = useProductStore();
 
 const items = ref([]);
-const cart = ref([]);
+// const cart = ref([]);
 
 const filters = reactive({
   sortBy: "title",
@@ -147,7 +147,6 @@ onMounted(async () => {
       />
     </div>
   </div>
-  <!--  :cart="cart"-->
   <CardList
     :add-item-to-cart="productStore.addProductToCart"
     @add-to-favorite="addToFavorite"

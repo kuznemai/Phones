@@ -1,8 +1,4 @@
 <script setup>
-// import {createdCartStore} from "../store.js";
-//
-// const cartStore = createdCartStore()
-
 import { useProductStore } from "../store2.js";
 
 const cartStore = useProductStore();

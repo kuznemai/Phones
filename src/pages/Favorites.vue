@@ -10,9 +10,9 @@ onMounted(async () => {
     const { data } = await axios.get(
       "https://ad59c37a99f145f4.mokky.dev/favorites?_relations=items",
     );
-    console.log(data);
+    console.log("data", data);
     favorites.value = data.map((obj) => obj.item);
-    console.log(favorites);
+    console.log("favorites", favorites.value);
   } catch (err) {
     console.log(err);
   }

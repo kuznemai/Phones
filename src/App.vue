@@ -19,22 +19,6 @@ const openDrawer = () => {
   drawerOpen.value = true;
 };
 
-// data.forEach(product => {
-//   cartStore.addProduct(product)
-// })
-
-// const addItemToCart = (item) => {
-//   cartStore.addItem(item)
-//     cart.value.push(item);
-//     console.log('dddddqwrqw',cart.value)
-// };
-// const removeItemFromCart = (item) => {
-//   cart.value.splice(cart.value.indexOf(item), 1);
-// };
-// const totalPrice = computed(() => {
-//   return cart.value.reduce((acc, item) => acc + item.price * item.quantity, 0);
-// });
-
 provide("cart", {
   closeDrawer,
   openDrawer,

@@ -1,9 +1,8 @@
 <script setup>
 import Card from "./Card.vue";
-// import {createdCartStore} from "../store.js";
+import { useRoute } from "vue-router";
 import { useProductStore } from "../store2.js";
-// removeItemFromCart: Function,
-// addItemToCart: Function,
+
 defineProps({
   items: Array,
 
@@ -12,10 +11,9 @@ defineProps({
 });
 
 // const cartStore2 = createdCartStore()
-
+const route = useRoute();
 const productStore = useProductStore();
 
-// const items = computed(() => cartStore.getAllProducts);
 const emit = defineEmits(["addToFavorite"]);
 
 const addToFavorite = (item) => {
@@ -28,7 +26,9 @@ const addToFavorite = (item) => {
     <!--    :cart="cart"-->
     <!--    :removeItemFromCart="removeItemFromCart"-->
     <Card
-      v-for="item in productStore.getAllProducts"
+      v-for="item in route.name === 'Favorites'
+        ? items
+        : productStore.getAllProducts"
       :key="item.id"
       :item="item"
       :is-favorite="item.isFavorite"
