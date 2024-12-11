@@ -10,6 +10,7 @@ import Favorites from "./pages/Favorites.vue";
 const app = createApp(App);
 
 const routes = [
+  { path: "/", redirect: "/home" },
   { path: "/home", name: "Home", component: Home },
   { path: "/favorites", name: "Favorites", component: Favorites },
 ];

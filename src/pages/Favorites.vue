@@ -12,7 +12,7 @@ onMounted(async () => {
     );
     console.log("data", data);
     favorites.value = data.map((obj) => obj.item);
-    console.log("favorites", favorites.value);
+    console.log("favorites", favorites);
   } catch (err) {
     console.log(err);
   }

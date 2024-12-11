@@ -3,6 +3,7 @@ import CardList from "../components/CardList.vue";
 import axios from "axios";
 import { onBeforeMount, onMounted, reactive, ref, watch } from "vue";
 import { useProductStore } from "../store2.js";
+import Card from "../components/Card.vue";
 
 const productStore = useProductStore();
 
@@ -148,6 +149,7 @@ onMounted(async () => {
     </div>
   </div>
   <CardList
+    :items="items"
     :add-item-to-cart="productStore.addProductToCart"
     @add-to-favorite="addToFavorite"
   />

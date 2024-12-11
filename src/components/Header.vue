@@ -11,7 +11,7 @@ const emit = defineEmits(["openDrawer", "closeDrawer"]); //closeDrawer можн�
 
 <template>
   <header class="flex justify-between border-b border-slate-400 px-10 py-2">
-    <router-link to="home">
+    <router-link to="/home">
       <div class="flex items-center gap-4">
         <img class="w-40" src="/logo2.png" alt="logo" />
         <div>

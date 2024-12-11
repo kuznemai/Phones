@@ -26,9 +26,7 @@ const addToFavorite = (item) => {
     <!--    :cart="cart"-->
     <!--    :removeItemFromCart="removeItemFromCart"-->
     <Card
-      v-for="item in route.name === 'Favorites'
-        ? items
-        : productStore.getAllProducts"
+      v-for="item in items"
       :key="item.id"
       :item="item"
       :is-favorite="item.isFavorite"
