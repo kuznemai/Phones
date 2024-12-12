@@ -2,7 +2,7 @@
 import { defineProps } from "vue";
 
 import Buttons from "./Buttons.vue";
-import { useProductStore } from "../store2.js";
+import { useProductStore } from "../store.js";
 
 const props = defineProps({
   item: Object,
@@ -10,7 +10,7 @@ const props = defineProps({
 });
 console.log(props.item);
 
-const emit = defineEmits(["addToFavorite"]);
+// const emit = defineEmits(["addToFavorite"]);
 
 const productStore = useProductStore();
 </script>
@@ -19,12 +19,13 @@ const productStore = useProductStore();
   <div
     class="flex flex-col justify-between relative bg-white border border-slate-100 rounded-3xl p-4 cursor-pointer hover:-translate-y-2 hover:shadow-xl transition"
   >
-    <!--    v-if="onClickFavorite"-->
+    <!--    &lt;!&ndash;    v-if="onClickFavorite"&ndash;&gt;-->
+    <!--    @click="emit('addToFavorite', item)"-->
     <img
       :src="!isFavorite ? '/like-1.svg' : '/like-2.svg'"
       class="absolute top-4 left-4"
       alt="Like"
-      @click="emit('addToFavorite', item)"
+      @click="productStore.addToFavorite(item)"
     />
 
     <img :src="item.imageUrl" class="w-20 mx-auto my-5 py-2" alt="Product" />

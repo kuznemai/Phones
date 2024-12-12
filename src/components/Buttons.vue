@@ -4,7 +4,7 @@ import { defineProps } from "vue";
 //
 // const cartStore = createdCartStore()
 
-import { useProductStore } from "../store2.js";
+import { useProductStore } from "../store.js";
 
 const cartStore = useProductStore();
 

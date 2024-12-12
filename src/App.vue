@@ -3,7 +3,7 @@ import Header from "./components/Header.vue";
 import Drawer from "./components/Drawer.vue";
 import { ref, provide, computed } from "vue";
 // import {createdCartStore} from "./store.js";
-import { useProductStore } from "./store2.js";
+import { useProductStore } from "./store.js";
 
 const productStore = useProductStore();
 
@@ -27,13 +27,11 @@ provide("cart", {
 
 <template>
   <div class="bg-white w-4/5 m-auto rounded-xl shadow-xl mt-14">
-    <!--    :cart="cart"-->
     <Drawer v-if="drawerOpen" :totalPrice="productStore.getTheTotalPrice" />
-    <!--    :cart="cart"-->
+
     <Header @openDrawer="openDrawer" />
 
     <div class="flex justify-end items-center mt-5 mr-5"></div>
-    <!--    <Home />-->
     <router-view></router-view>
   </div>
 </template>

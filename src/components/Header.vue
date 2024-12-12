@@ -1,10 +1,6 @@
 <script setup>
 import Cart from "./Cart.vue";
-
-// defineProps({
-//   // totalPrice: Number,
-//   // cart: Array,
-// });
+import { defineEmits } from "vue";
 
 const emit = defineEmits(["openDrawer", "closeDrawer"]); //closeDrawer можно убрать?
 </script>
@@ -22,7 +18,6 @@ const emit = defineEmits(["openDrawer", "closeDrawer"]); //closeDrawer можн�
     </router-link>
 
     <ul class="flex items-center gap-8">
-      <!--      :cart="cart"-->
       <Cart @click="() => emit('openDrawer')" />
       <router-link to="/favorites">
         <li
