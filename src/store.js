@@ -8,12 +8,15 @@ export const useProductStore = defineStore("productStore", {
     favorites: [],
   }),
   actions: {
-    async fetchItems(filters) {
+    async fetchItems(filters = { sortBy: true , filterInput: true }) {
       try {
-        const params = {
-          sortBy: filters.sortBy,
-        };
-        if (filters.filterInput) {
+        const params = {};
+
+        if( filters?.sortBy ){
+          params.sortBy = filters.sortBy
+        }
+
+        if (filters?.filterInput) {
           params.title = `*${filters.filterInput}*`;
         }
 
@@ -34,13 +37,14 @@ export const useProductStore = defineStore("productStore", {
     // setProducts(products) {
     //   this.products = products;
     // },
-    addProductToCart(id, quantity) {
+   async addProductToCart(id, quantity) {
       const existingItem = this.cart.find((item) => item.id === id);
       if (existingItem) {
         existingItem.quantity += quantity; // Увеличиваем количество, если продукт уже в корзине
       } else {
         this.cart.push({ id, quantity }); // Добавляем новый продукт в корзину
       }
+      await this.fetchItems();
     },
     deleteProductFromCart(id, quantity) {
       const existingItem = this.cart.find((item) => item.id === id);
