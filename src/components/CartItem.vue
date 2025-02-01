@@ -39,7 +39,7 @@ const props = defineProps({
 
         <div>
           <img
-            @click="cartStore.deleteProductFromCart(item.id, item.quantity)"
+            @click="cartStore.deleteProductFromCart(item.id)"
             src="/close.svg"
             alt="Delete"
             class="cursor-pointer opacity-60 hover:opacity-100 transition ml-50"

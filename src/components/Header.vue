@@ -2,7 +2,7 @@
 import Cart from "./Cart.vue";
 import { defineEmits } from "vue";
 
-const emit = defineEmits(["openDrawer", "closeDrawer"]); //closeDrawer можно убрать?
+const emit = defineEmits(["openDrawer"]);
 </script>
 
 <template>

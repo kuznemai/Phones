@@ -48,7 +48,7 @@ const productStore = useProductStore();
         <button
           v-else
           type="button"
-          @click="productStore.addProductToCart(item.id, 1)"
+          @click="productStore.addProductToCart(item.id)"
           class="button_addtocart"
         >
           Buy

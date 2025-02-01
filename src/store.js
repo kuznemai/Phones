@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
+import debounce from 'lodash.debounce'
 
 export const useProductStore = defineStore("productStore", {
   state: () => ({
@@ -8,23 +9,11 @@ export const useProductStore = defineStore("productStore", {
     favorites: [],
   }),
   actions: {
-    async fetchItems(filters = { sortBy: true , filterInput: true }) {
+    async fetchItems() {
       try {
-        const params = {};
-
-        if( filters?.sortBy ){
-          params.sortBy = filters.sortBy
-        }
-
-        if (filters?.filterInput) {
-          params.title = `*${filters.filterInput}*`;
-        }
-
         const { data } = await axios.get(
           `https://ad59c37a99f145f4.mokky.dev/items`,
-          { params },
         );
-
         this.products = data.map((obj) => ({
           ...obj,
           isFavorite: false,
@@ -33,30 +22,32 @@ export const useProductStore = defineStore("productStore", {
         console.error("Error fetching items:", err);
       }
     },
-    // ...остальные
-    // setProducts(products) {
-    //   this.products = products;
-    // },
-   async addProductToCart(id, quantity) {
-      const existingItem = this.cart.find((item) => item.id === id);
-      if (existingItem) {
-        existingItem.quantity += quantity; // Увеличиваем количество, если продукт уже в корзине
-      } else {
-        this.cart.push({ id, quantity }); // Добавляем новый продукт в корзину
-      }
-      await this.fetchItems();
+    loadCartFromLocalStorage() {
+      const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
+      this.cart = savedCart;
     },
-    deleteProductFromCart(id, quantity) {
+    saveCartToLocalStorage() {
+      localStorage.setItem("cart", JSON.stringify(this.cart));
+    },
+     addProductToCart(id) {
       const existingItem = this.cart.find((item) => item.id === id);
-
       if (existingItem) {
-        existingItem.quantity -= quantity; // Уменьшаем количество
-
-        // Если количество становится меньше или равно 0, удаляем товар из корзины
+        existingItem.quantity ++; // Увеличиваем количество, если продукт уже в корзине
+      } else {
+        this.cart.push({ id, quantity:1 }); // Добавляем новый продукт в корзину
+      }
+      this.saveCartToLocalStorage(); // Сохраняем корзину в localStorage
+    },
+    deleteProductFromCart(id) {
+      const existingItem = this.cart.find((item) => item.id === id);
+      if (existingItem) {
+        existingItem.quantity --; // Уменьшаем количество
         if (existingItem.quantity <= 0) {
           this.cart.splice(this.cart.indexOf(existingItem), 1);
         }
+        // TODO поправить quantity
       }
+      this.saveCartToLocalStorage(); // Сохраняем корзину в localStorage
     },
     addToFavorite(item) {
       if (!item.isFavorite) {
@@ -81,7 +72,6 @@ export const useProductStore = defineStore("productStore", {
 
       this.favorites = savedFavorites;
 
-      // Обновляем флаг isFavorite у соответствующих товаров
       savedFavorites.forEach((fav) => {
         const product = this.products.find((product) => product.id === fav.id);
         if (product) {
@@ -91,20 +81,18 @@ export const useProductStore = defineStore("productStore", {
     },
     async createOrder() {
       try {
-        // Проверяем, есть ли товары в корзине
         if (this.cart.length === 0) {
           throw new Error("The cart is empty. Cannot place an order.");
         }
 
-        // Рассчитываем общую стоимость заказа
         const totalPrice = this.cart.reduce((total, item) => {
           const product = this.products.find(
             (product) => product.id === item.id,
           );
-          return total + (product ? product.price * item.quantity : 0);
+          return total + (product?.price ? product.price * item.quantity : 0);
         }, 0);
 
-        // Отправляем запрос на сервер
+        // Отправляем запрос на сервер // вопрос? при отправке на сервер data так же оформляется в усы? зачем, если возвращается ответ от сервера
         const { data } = await axios.post(
           `https://ad59c37a99f145f4.mokky.dev/orders`,
           {
@@ -118,10 +106,11 @@ export const useProductStore = defineStore("productStore", {
 
         // Очищаем корзину после успешного заказа
         this.cart = [];
+        localStorage.removeItem("cart");
         return data;
       } catch (err) {
         console.error("Error creating order:", err);
-        throw err; // Пробрасываем ошибку, чтобы можно было её обработать на уровне компонента
+        throw err;
       }
     },
   },
