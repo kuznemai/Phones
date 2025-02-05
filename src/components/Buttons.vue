@@ -28,7 +28,7 @@ const props = defineProps({
   <!--  <button type="button" @click="cartStore.addItemToCart(id, 1)"-->
   <button
     type="button"
-    @click="cartStore.addProductToCart(id, 1)"
+    @click="cartStore.addProductToCart(id)"
     class="plus bg-gray-200 hover:bg-gray-300 transition text-gray-800 px-3 py-1"
   >
     +

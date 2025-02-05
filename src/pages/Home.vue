@@ -1,7 +1,7 @@
 <script setup>
 import CardList from "../components/CardList.vue";
 import axios from "axios";
-import { onBeforeMount, onMounted, reactive, ref, watch } from "vue";
+import {computed, onBeforeMount, onMounted, reactive, ref, watch} from "vue";
 import { useProductStore } from "../store.js";
 
 const productStore = useProductStore();
@@ -11,23 +11,43 @@ const filters = reactive({
   filterInput: "",
 });
 
+const filteredProducts = computed(() => {
+  let products = [...productStore?.products] ;
+
+  if (filters.filterInput) {
+    products = products.filter(product => {
+      return product.title.toLowerCase().includes(filters.filterInput.toLowerCase());
+    });
+  }
+
+  if (filters.sortBy) {
+    products = products.sort((a, b) => {
+      if (filters.sortBy === "price") {
+        return a.price - b.price;
+      } else if (filters.sortBy === "-price") {
+        return b.price - a.price;
+      } else {
+        return a.title.localeCompare(b.title);
+      }
+    });
+  }
+  return products;
+});
+
 const onChangeSelect = (event) => {
   filters.sortBy = event.target.value;
+
 };
 
 const onChangeInput = (event) => {
   filters.filterInput = event.target.value;
 };
 
-const fetchItems = async () => {
-  await productStore.fetchItems(filters);
-};
-
-watch(filters, fetchItems);
 
 onMounted(async () => {
-  await productStore.fetchItems(filters);
+  await productStore.fetchItems();
   productStore.fetchFavorites();
+  productStore.loadCartFromLocalStorage();
 });
 </script>
 
@@ -57,8 +77,8 @@ onMounted(async () => {
     </div>
   </div>
   <CardList
-    :items="productStore.products"
-    :add-item-to-cart="productStore.addProductToCart"
-    @add-to-favorite="productStore.addToFavorite"
+    :items="filteredProducts"
   />
+<!-- TODO:add-item-to-cart="productStore.addProductToCart"  поглядеть в чем дело-->
 </template>
+
