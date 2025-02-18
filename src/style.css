@@ -1,11 +1,10 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 
 body{
-  background-color: #ffffff;
+  background-color: #000000;
 }
 
 .button_addtocart {
@@ -13,7 +12,17 @@ body{
   height: 36px;
   border: 1px solid #a6a6a6;
   border-radius: 8px;
-  color: white;
-  background-color: #66b666;
+  color: #ffffff;
+  background-color:#0C38D4;
   font-size: 18px;
+}
+
+.button_addtocart:hover {
+  background-color: #102983;
+  transition: background-color 0.5s;
+}
+
+.grid-cols-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }

@@ -19,7 +19,7 @@ const props = defineProps({
 
 <template>
   <div
-    class="flex items-center border border-slate-100 p-5 rounded-xl gap-10 mt-2"
+      class="flex items-center border border-slate-100 p-5 rounded-xl gap-10 mt-2"
   >
     <img class="w-16 h-22" :src="imageUrl" :alt="title" />
 
@@ -32,17 +32,17 @@ const props = defineProps({
         </div>
 
         <div
-          class="flex items-center space-x-2 border-solid border-2 border-gray-200 rounded-lg"
+            class="flex items-center space-x-2 border-solid border-2 border-gray-200 rounded-lg"
         >
           <Buttons :id="item.id" />
         </div>
 
         <div>
           <img
-            @click="cartStore.deleteProductFromCart(item.id, item.quantity)"
-            src="/close.svg"
-            alt="Delete"
-            class="cursor-pointer opacity-60 hover:opacity-100 transition ml-50"
+              @click="cartStore.deleteProductFromCart(item.id)"
+              src="/close.svg"
+              alt="Delete"
+              class="cursor-pointer opacity-60 hover:opacity-100 transition ml-50"
           />
         </div>
       </div>

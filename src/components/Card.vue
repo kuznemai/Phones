@@ -17,16 +17,24 @@ const productStore = useProductStore();
 
 <template>
   <div
-    class="flex flex-col justify-between relative bg-white border border-slate-100 rounded-3xl p-4 cursor-pointer hover:-translate-y-2 hover:shadow-xl transition"
+      class="flex flex-col justify-between max-w-[260px] relative bg-black border border-slate-100 rounded-3xl p-4 cursor-pointer hover:-translate-y-2 hover:shadow-xl transition text-gray-200"
   >
-    <!--    &lt;!&ndash;    v-if="onClickFavorite"&ndash;&gt;-->
-    <!--    @click="emit('addToFavorite', item)"-->
-    <img
-      :src="!isFavorite ? '/like-1.svg' : '/like-2.svg'"
-      class="absolute top-4 left-4"
-      alt="Like"
-      @click="productStore.addToFavorite(item)"
-    />
+    <!-- Иконка лайка -->
+    <svg
+        @click="productStore.addToFavorite(item)"
+        class="absolute top-4 left-4 w-10 cursor-pointer transition transform hover:scale-110"
+        viewBox="0 0 34 34"
+        xmlns="http://www.w3.org/2000/svg"
+        :fill="isFavorite ? 'white' : 'none'"
+        :stroke="'white'"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+      <path
+          d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"
+      />
+    </svg>
 
     <img :src="item.imageUrl" class="w-20 mx-auto my-5 py-2" alt="Product" />
     <p class="mt-2">{{ item.title }}</p>
@@ -40,16 +48,16 @@ const productStore = useProductStore();
       <div>
         <div v-if="productStore.getCount(item.id) > 0">
           <div
-            class="flex items-center space-x-3 border-solid border-2 border-gray-200 rounded-lg mr-8"
+              class="flex items-center space-x-3 border-solid border-2 border-gray-200 rounded-lg mr-8"
           >
             <Buttons :id="item.id" />
           </div>
         </div>
         <button
-          v-else
-          type="button"
-          @click="productStore.addProductToCart(item.id, 1)"
-          class="button_addtocart"
+            v-else
+            type="button"
+            @click="productStore.addProductToCart(item.id)"
+            class="button_addtocart"
         >
           Buy
         </button>

@@ -11,13 +11,14 @@ const cartStore = useProductStore();
 const props = defineProps({
   id: Number,
 });
+
 </script>
 <template>
   <!--  <button type="button" @click="cartStore.addItemToCart(id, -1)"-->
   <button
-    type="button"
-    @click="cartStore.deleteProductFromCart(id, 1)"
-    class="minus bg-gray-200 hover:bg-gray-300 transition text-gray-800 px-3 py-1"
+      type="button"
+      @click="cartStore.deleteProductFromCart(id, 1)"
+      class="minus   transition text-gray-200 px-3 py-1"
   >
     -
   </button>
@@ -27,9 +28,9 @@ const props = defineProps({
 
   <!--  <button type="button" @click="cartStore.addItemToCart(id, 1)"-->
   <button
-    type="button"
-    @click="cartStore.addProductToCart(id, 1)"
-    class="plus bg-gray-200 hover:bg-gray-300 transition text-gray-800 px-3 py-1"
+      type="button"
+      @click="cartStore.addProductToCart(id)"
+      class="plus   transition text-gray-200 px-3 py-1"
   >
     +
   </button>

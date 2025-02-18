@@ -26,7 +26,7 @@ provide("cart", {
 </script>
 
 <template>
-  <div class="bg-white w-4/5 m-auto rounded-xl shadow-xl mt-14">
+  <div class="bg-black w-4/5 m-auto rounded-xl shadow-xl mt-14">
     <Drawer v-if="drawerOpen" :totalPrice="productStore.getTheTotalPrice" />
 
     <Header @openDrawer="openDrawer" />
