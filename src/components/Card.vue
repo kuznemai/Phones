@@ -14,7 +14,8 @@ const productStore = useProductStore();
 
 // Функция для обработки клика по названию товара
 const handleTitleClick = () => {
-  emit("navigateToProduct"); // Вызываем переданную функцию
+  const url = `/product/${props.item.id}`;
+  window.open(url, '_blank'); // Открывает товар в новой вкладке
 };
 </script>
 
@@ -55,7 +56,7 @@ const handleTitleClick = () => {
       <div>
         <div v-if="productStore.getCount(item.id) > 0">
           <div
-              class="flex items-center space-x-3 border-solid border-2 border-gray-200 rounded-lg mr-8"
+              class="flex items-center space-x-3 border-solid border-2 border-gray-200 rounded-lg"
           >
             <Buttons :id="item.id" />
           </div>

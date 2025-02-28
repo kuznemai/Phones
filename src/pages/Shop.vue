@@ -54,9 +54,9 @@ onMounted(async () => {
         @change="onChangeSelect"
         class="bg-black text-gray-400  py-2 px-3.5 border rounded-md outline-none select-sort "
     >
-      <option value="name">By name</option>
-      <option value="price">By price(low to high)</option>
-      <option value="-price">By price(high to low)</option>
+      <option value="name" class="select-option">By name</option>
+      <option value="price" class="select-option">By price(low to high)</option>
+      <option value="-price" class="select-option">By price(high to low)</option>
     </select>
 
     <div class="relative">
@@ -117,7 +117,7 @@ onMounted(async () => {
     width: 100%;
   }
 
-  .select-sort,
+
   .search-input {
     width: 100%;
     padding-left: 3rem;

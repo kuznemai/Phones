@@ -26,8 +26,8 @@ const closeMenu = () => {
       <div class="desktop-nav flex gap-6 flex-grow justify-center">
         <router-link to="/" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">HOME</router-link>
         <router-link to="/shop" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">SHOP</router-link>
-        <router-link to="" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">CONTACTS</router-link>
-        <router-link to="" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">OUR OFFER</router-link>
+        <router-link to="/contact" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">CONTACT US</router-link>
+        <router-link to="/offer" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">OUR OFFER</router-link>
       </div>
 
       <div class="nav-sidebar flex gap-6">
@@ -61,10 +61,10 @@ const closeMenu = () => {
         <router-link to="/shop" @click="closeMenu">
           <li class="cursor-pointer hover:text-slate-200">Shop</li>
         </router-link>
-        <router-link to="/" @click="closeMenu">
+        <router-link to="/contact" @click="closeMenu">
           <li class="cursor-pointer hover:text-slate-200">Contact us</li>
         </router-link>
-        <router-link to="/shop" @click="closeMenu">
+        <router-link to="/offer" @click="closeMenu">
           <li class="cursor-pointer hover:text-slate-200">Our offer</li>
         </router-link>
         <router-link to="/favorites" @click="closeMenu">

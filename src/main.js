@@ -7,6 +7,8 @@ import { createPinia } from "pinia";
 import Shop from "./pages/Shop.vue";
 import Home from "./pages/Home.vue";
 import Favorites from "./pages/Favorites.vue";
+import ContactUs from "./pages/ContactUs.vue";
+import OurOffer from "./pages/OurOffer.vue";
 import CardOfItem from "./components/CardOfItem.vue";
 
 
@@ -17,6 +19,8 @@ const routes = [
   { path: "/shop", name: "Shop", component: Shop },
   { path: "/favorites", name: "Favorites", component: Favorites },
   { path: "/product/:id", name: "CardOfItem", component: CardOfItem },
+  { path: "/offer", name: "OurOffer", component: OurOffer },
+  { path: "/contact", component: ContactUs }
 ];
 
 const router = createRouter({

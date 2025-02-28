@@ -10,12 +10,13 @@ defineProps({
 const productStore = useProductStore();
 
 const navigateToProduct = (id) => {
-  window.location.href = `/product/${id}`; // Или используйте router.push, если у вас настроен Vue Router
+  const url = `/product/${id}`;
+  window.open(url, '_blank'); // Открывает товар в новой вкладке
 };
 </script>
 
 <template>
-  <div v-if="items && items.length > 0" class="items_list flex flex-row flex-wrap mx-10 w-full gap-4 py-10">
+  <div v-if="items && items.length > 0" class="items_list flex flex-row flex-wrap mx-10 w-full gap-4 py-10 fade-in ">
     <Card
         v-for="item in items"
         :key="item.id"

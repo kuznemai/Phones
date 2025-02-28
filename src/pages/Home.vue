@@ -1,6 +1,7 @@
 <script setup>
 
 import CardOfItem from "../components/CardOfItem.vue";
+import ContactUs from "./ContactUs.vue";
 </script>
 <template>
 
@@ -62,7 +63,6 @@ import CardOfItem from "../components/CardOfItem.vue";
       <img src="/s1-img2.jpg" alt="white_phone" class="product_description__image fade-in w-80"/>
     </div>
   </section>
-  <CardOfItem></CardOfItem>
 </template>
 
 <style>
@@ -302,10 +302,11 @@ import CardOfItem from "../components/CardOfItem.vue";
   }
 }
 
-@media (min-width: 1280px) {
+@media (max-width: 2000px) and  (min-width: 1280px) {
   .introduction__img {
     position: absolute;
-    left: -500px;
+    left: -660px;
   }
 }
+
 </style>
