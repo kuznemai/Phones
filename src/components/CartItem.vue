@@ -23,12 +23,12 @@ const props = defineProps({
   >
     <img class="w-16 h-22" :src="imageUrl" :alt="title" />
 
-    <div class="flex flex-col flex-1">
+    <div class="flex flex-col flex-1 text-white">
       <p>{{ title }}</p>
 
       <div class="flex gap-2 items-center mt-4">
         <div class="flex justify-between mt-2">
-          <b class="flex-1">{{ price }} $</b>
+          <b class="flex-1">{{ price }}$</b>
         </div>
 
         <div
@@ -39,7 +39,7 @@ const props = defineProps({
 
         <div>
           <img
-              @click="cartStore.deleteProductFromCart(item.id)"
+              @click="cartStore.removeProductFromCart(item.id)"
               src="/close.svg"
               alt="Delete"
               class="cursor-pointer opacity-60 hover:opacity-100 transition ml-50"

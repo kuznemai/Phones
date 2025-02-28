@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-import debounce from 'lodash.debounce'
 
 export const useProductStore = defineStore("productStore", {
   state: () => ({
@@ -38,7 +37,7 @@ export const useProductStore = defineStore("productStore", {
       }
       this.saveCartToLocalStorage(); // Сохраняем корзину в localStorage
     },
-    deleteProductFromCart(id) {
+    reduceProductFromCart(id) {
       const existingItem = this.cart.find((item) => item.id === id);
       if (existingItem) {
         existingItem.quantity --; // Уменьшаем количество
@@ -46,6 +45,13 @@ export const useProductStore = defineStore("productStore", {
           this.cart.splice(this.cart.indexOf(existingItem), 1);
         }
         // TODO поправить quantity
+      }
+      this.saveCartToLocalStorage(); // Сохраняем корзину в localStorage
+    },
+    removeProductFromCart(id) {
+      const existingItem = this.cart.find((item) => item.id === id);
+      if (existingItem) {
+        this.cart.splice(this.cart.indexOf(existingItem), 1);
       }
       this.saveCartToLocalStorage(); // Сохраняем корзину в localStorage
     },
@@ -86,13 +92,10 @@ export const useProductStore = defineStore("productStore", {
         }
 
         const totalPrice = this.cart.reduce((total, item) => {
-          const product = this.products.find(
-              (product) => product.id === item.id,
-          );
-          return total + (product?.price ? product.price * item.quantity : 0);
+          const product = this.products.find((product) => product.id === item.id);
+          return total + (product ? product.price * item.quantity : 0); // Проверка
         }, 0);
 
-        // Отправляем запрос на сервер // вопрос? при отправке на сервер data так же оформляется в усы? зачем, если возвращается ответ от сервера
         const { data } = await axios.post(
             `https://ad59c37a99f145f4.mokky.dev/orders`,
             {
@@ -101,10 +104,9 @@ export const useProductStore = defineStore("productStore", {
                 quantity: item.quantity,
               })),
               totalPrice,
-            },
+            }
         );
 
-        // Очищаем корзину после успешного заказа
         this.cart = [];
         localStorage.removeItem("cart");
         return data;
@@ -112,7 +114,7 @@ export const useProductStore = defineStore("productStore", {
         console.error("Error creating order:", err);
         throw err;
       }
-    },
+    }
   },
   getters: {
     getAllProducts: (state) => {
@@ -127,10 +129,8 @@ export const useProductStore = defineStore("productStore", {
     getTheTotalPrice: (state) => {
       return () => {
         return state.cart.reduce((total, item) => {
-          const product = state.products.find(
-              (product) => product.id === item.id,
-          );
-          return total + product.price * item.quantity;
+          const product = state.products.find((product) => product.id === item.id);
+          return total + (product ? product.price * item.quantity : 0); // Проверка на undefined
         }, 0);
       };
     },

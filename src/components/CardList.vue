@@ -1,6 +1,5 @@
 <script setup>
 import Card from "./Card.vue";
-import { useRoute } from "vue-router";
 import { useProductStore } from "../store.js";
 
 defineProps({
@@ -8,21 +7,45 @@ defineProps({
   onClickFavorite: Function,
 });
 
-
-const route = useRoute();
 const productStore = useProductStore();
 
+const navigateToProduct = (id) => {
+  window.location.href = `/product/${id}`; // Или используйте router.push, если у вас настроен Vue Router
+};
 </script>
 
 <template>
-  <div class="grid grid-cols-auto-fit gap-5 p-10">
-
+  <div v-if="items && items.length > 0" class="items_list flex flex-row flex-wrap mx-10 w-full gap-4 py-10">
     <Card
         v-for="item in items"
         :key="item.id"
         :item="item"
         :is-favorite="item.isFavorite"
         @add-to-favorite="productStore.addToFavorite(item)"
+        @navigate-to-product="navigateToProduct(item.id)"
     />
   </div>
+  <div v-else>
+    <p>Loading...</p>
+  </div>
 </template>
+
+<style scoped>
+
+@media (max-width: 550px) and (min-width: 320px) {
+  .items_list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+  }
+}
+@media (max-width: 768px) and (min-width: 550px) {
+  .items_list {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding-top: 40px;
+  }
+}
+</style>

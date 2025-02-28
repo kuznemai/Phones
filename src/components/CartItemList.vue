@@ -6,7 +6,7 @@ const cartStore = useProductStore();
 </script>
 
 <template>
-  <div class="flex flex-col flex-1 gap-4" v-auto-animate>
+  <div class="flex flex-col flex-1 gap-4 mt-8" v-auto-animate>
     <CartItem
         v-for="item in cartStore.getAllItemsInCart"
         :item="item"

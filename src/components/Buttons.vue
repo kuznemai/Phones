@@ -17,14 +17,14 @@ const props = defineProps({
   <!--  <button type="button" @click="cartStore.addItemToCart(id, -1)"-->
   <button
       type="button"
-      @click="cartStore.deleteProductFromCart(id, 1)"
-      class="minus   transition text-gray-200 px-3 py-1"
+      @click="cartStore.reduceProductFromCart(id, 1)"
+      class="minus transition text-gray-200 px-3 py-1"
   >
     -
   </button>
 
   <!--  <span class="counter text-lg">{{ cartStore.getCount(id) }}</span>-->
-  <span class="counter text-lg">{{ cartStore.getCount(id) }}</span>
+  <span class="counter text-lg text-white">{{ cartStore.getCount(id) }}</span>
 
   <!--  <button type="button" @click="cartStore.addItemToCart(id, 1)"-->
   <button
