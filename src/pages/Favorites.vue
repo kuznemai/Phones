@@ -5,6 +5,9 @@ import CardList from "../components/CardList.vue";
 import { useProductStore } from "../store.js";
 
 const productStore = useProductStore();
+onMounted(() => {
+  productStore.fetchFavorites();
+});
 </script>
 
 <template>
@@ -15,7 +18,7 @@ const productStore = useProductStore();
 </template>
 
 <style scoped>
-/* Медиазапрос для мобильных экранов */
+
 @media (max-width: 550px) and (min-width: 320px) {
   .fav-list {
     display: flex;

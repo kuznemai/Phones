@@ -46,14 +46,14 @@ export const useProductStore = defineStore("productStore", {
         }
         // TODO поправить quantity
       }
-      this.saveCartToLocalStorage(); // Сохраняем корзину в localStorage
+      this.saveCartToLocalStorage();
     },
     removeProductFromCart(id) {
       const existingItem = this.cart.find((item) => item.id === id);
       if (existingItem) {
         this.cart.splice(this.cart.indexOf(existingItem), 1);
       }
-      this.saveCartToLocalStorage(); // Сохраняем корзину в localStorage
+      this.saveCartToLocalStorage();
     },
     addToFavorite(item) {
       if (!item.isFavorite) {
@@ -123,14 +123,14 @@ export const useProductStore = defineStore("productStore", {
     getCount: (state) => {
       return (itemId) => {
         const item = state.cart.find((item) => item.id === itemId);
-        return item ? item.quantity : 0; // Возвращаем количество или 0, если продукт не найден
+        return item ? item.quantity : 0;
       };
     },
     getTheTotalPrice: (state) => {
       return () => {
         return state.cart.reduce((total, item) => {
           const product = state.products.find((product) => product.id === item.id);
-          return total + (product ? product.price * item.quantity : 0); // Проверка на undefined
+          return total + (product ? product.price * item.quantity : 0);
         }, 0);
       };
     },
@@ -141,7 +141,7 @@ export const useProductStore = defineStore("productStore", {
         );
         return {
           ...product,
-          quantity: cartItem.quantity, // Добавляем количество к продукту
+          quantity: cartItem.quantity,
         };
       });
     },

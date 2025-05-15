@@ -8,25 +8,24 @@ import InfoBlock from "./InfoBlock.vue";
 
 const cartStore = useProductStore();
 const isCreatingOrder = ref(false);
-const orderInfo = ref(null); // Хранит информацию о заказе
+const orderInfo = ref(null);
 
 
 const handlePlaceOrder = async () => {
   isCreatingOrder.value = true;
 
   try {
-    const orderData = await cartStore.createOrder(); // orderData содержит id заказа
+    const orderData = await cartStore.createOrder();
     console.log("Order placed successfully:", orderData);
 
-    // Сохраняем информацию о заказе
     orderInfo.value = {
-      number: orderData.id, // id заказа, возвращённый сервером
+      number: orderData.id,
       description: "Order placed successfully!",
       imageUrl: "/completed.png",
     };
   } catch (error) {
     console.error("Failed to place order:", error);
-    alert("Failed to place order. Please try again."); // Можно заменить другим компонентом, если нужно
+    alert("Failed to place order. Please try again.");
   } finally {
     isCreatingOrder.value = false;
   }
@@ -35,10 +34,9 @@ const handlePlaceOrder = async () => {
 
 <template>
   <div class="fixed top-0 left-0 h-full w-full bg-black z-10 opacity-70"></div>
-  <div class="bg-black w-96 h-full fixed right-0 top-0 z-20 p-8 overflow-y-auto">
+  <div class="bg-black w-96 h-full fixed right-0 top-0 z-20 p-8 overflow-y-auto" style="box-shadow: -4px 0 12px rgba(255, 255, 255, 0.15);">
     <DrawerHead />
 
-    <!-- Если заказ завершён, показываем InfoBlock -->
     <div v-if="orderInfo">
       <InfoBlock
           :title="`Your order number is #${orderInfo.number}`"
@@ -47,7 +45,6 @@ const handlePlaceOrder = async () => {
       />
     </div>
 
-    <!-- Если корзина пуста, показываем сообщение -->
     <div
         v-else-if="cartStore.cart.length === 0"
         class="flex flex-col items-center"
@@ -59,11 +56,8 @@ const handlePlaceOrder = async () => {
       />
     </div>
 
-    <!-- Если корзина непуста -->
     <div v-else>
       <CartItemList />
-
-
       <div class="flex flex-col gap-2 mt-10">
         <div class="flex gap-2">
           <span class="text-white">Subtotal:</span>
@@ -82,7 +76,6 @@ const handlePlaceOrder = async () => {
           <div class="flex-1 border-b border-dashed"></div>
           <b>{{ cartStore.getTheTotalPrice()  +  Number((cartStore.getTheTotalPrice() * 0.05).toFixed(2)) }} $</b>
         </div>
-
 
         <button
             :disabled="isCreatingOrder"
