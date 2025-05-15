@@ -19,8 +19,16 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",
     "autoprefixer": "^10.4.20",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
-    "vite": "^5.4.14"
+    "vite": "^5.4.14",
+    "vite-plugin-pages": "^0.33.0"
+  },
+  "homepage": "https://kuznemai.github.io/Phones",
+  "scripts": {
+    "build": "vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   }
 }
