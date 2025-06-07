@@ -21,7 +21,7 @@ const handlePlaceOrder = async () => {
     orderInfo.value = {
       number: orderData.id,
       description: "Order placed successfully!",
-      imageUrl: "/completed.png",
+      imageUrl: "./completed.png",
     };
   } catch (error) {
     console.error("Failed to place order:", error);
@@ -52,7 +52,7 @@ const handlePlaceOrder = async () => {
       <InfoBlock
           title="The cart is empty"
           description="You probably haven't ordered anything yet"
-          imageUrl="/emptybox.png"
+          imageUrl="./emptybox.png"
       />
     </div>
 

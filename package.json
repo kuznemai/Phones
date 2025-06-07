@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
@@ -25,10 +27,5 @@
     "vite": "^5.4.14",
     "vite-plugin-pages": "^0.33.0"
   },
-  "homepage": "https://kuznemai.github.io/Phones",
-  "scripts": {
-    "build": "vite build",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
-  }
+  "homepage": "https://kuznemai.github.io/Phones"
 }
