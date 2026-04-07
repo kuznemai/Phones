@@ -1,8 +1,7 @@
-<script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios";
+<script setup lang="ts">
+import { onMounted } from "vue";
 import CardList from "../components/CardList.vue";
-import { useProductStore } from "../store.js";
+import { useProductStore } from "../store";
 
 const productStore = useProductStore();
 onMounted(() => {

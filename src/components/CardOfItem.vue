@@ -1,42 +1,22 @@
-<script setup>
-import {ref, onMounted, reactive, toRaw} from "vue";
-import {useRoute} from "vue-router";
+<script setup lang="ts">
+import { ref, onMounted, toRaw } from "vue";
+import { useRoute } from "vue-router";
 import Buttons from "./Buttons.vue";
-import {useProductStore} from "../store.js";
+import { useProductStore } from "../store";
+import type { Product } from "../store";
 
 const route = useRoute();
 const productStore = useProductStore();
-const product = ref(null);
-const products = ref([]);
-
-const rawProducts = [...products.value];
-console.log(rawProducts);
+const product = ref<Product | null>(null);
 
 onMounted(async () => {
-  await productStore.fetchItems(); // Загружаем товары
-  products.value = productStore.getAllProducts; // Получаем все товары через геттер
+  await productStore.fetchItems();
+  const rawProducts = toRaw(productStore.getAllProducts);
+  const productId = route.params.id;
 
-  // Распаковываем Proxy для отладки
-  const rawProducts = toRaw(products.value);
-  console.log('Raw products:', rawProducts);
-
-  const productId = route.params.id; // Получаем ID товара из маршрута
-  console.log('productId', productId);
-
-  product.value = rawProducts.find((p) => {
-    if (String(p.id) === String(productId)) {
-      return p.id
-    }
-
-  });
-
-
-  if (!product.value) {
-    console.error("Product not found");
-  }
+  product.value =
+    rawProducts.find((p) => String(p.id) === String(productId)) ?? null;
 });
-
-
 </script>
 
 <template>
@@ -62,26 +42,30 @@ onMounted(async () => {
               </p>
             </div>
 
-            <!-- Product Buttons -->
-            <div class="product_button flex flex-row justify-between items-end mt-auto">
+            <!-- Product Buttons: same box for Add to cart and counter (fixed height = no jump) -->
+            <div class="product_button flex flex-row flex-wrap justify-between items-end gap-4 mt-auto">
               <div class="flex flex-col">
                 <span class="text-slate-400 md:text-sm lg:text-base">Price:</span>
                 <b class="price md:text-sm lg:text-3xl text-white">{{ product.price }} $</b>
               </div>
 
-              <div>
-                <div v-if="productStore.getCount(product.id) > 0">
-                  <div class="flex items-center space-x-3 border-solid border-2 border-gray-200 rounded-lg mr-8">
-                    <Buttons :id="product.id"/>
-                  </div>
+              <!-- Single shell: overflow-hidden + flex (not inline-flex) so hover fills full pill -->
+              <div
+                class="flex h-[3.25rem] min-h-[3.25rem] min-w-[12.5rem] shrink-0 overflow-hidden rounded-xl border border-indigo-500/30 bg-indigo-950/50"
+              >
+                <div
+                  v-if="productStore.getCount(product.id) > 0"
+                  class="flex h-full w-full min-h-0 min-w-0 px-3"
+                >
+                  <Buttons :id="product.id" size="lg" />
                 </div>
                 <button
-                    v-else
-                    type="button"
-                    @click="productStore.addProductToCart(product.id)"
-                    class="button_addtocart"
+                  v-else
+                  type="button"
+                  @click="productStore.addProductToCart(product.id)"
+                  class="flex h-full min-h-0 w-full min-w-0 items-center justify-center px-8 text-base font-medium tracking-wide text-indigo-200 transition-colors duration-200 hover:bg-indigo-800/45 hover:text-indigo-50 active:bg-indigo-800/55 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
-                  Buy
+                  Add to cart
                 </button>
               </div>
             </div>
@@ -128,17 +112,6 @@ onMounted(async () => {
   margin: 0;
 }
 
-.button_addtocart {
-  width: 160px;
-  height: 40px;
-  font-size: 22px;
-}
-
-.button_addtocart:hover {
-  background-color: #102983;
-  transition: background-color 0.5s;
-}
-
 @media (max-width: 1024px) and (min-width: 320px) {
   .product_wrapper > div {
     padding: 0;
@@ -172,12 +145,6 @@ onMounted(async () => {
   }
   .price {
     font-size: 24px;
-  }
-
-  .button_addtocart {
-    width: 140px;
-    height: 35px;
-    font-size: 22px;
   }
 }
 </style>

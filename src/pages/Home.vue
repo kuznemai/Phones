@@ -1,7 +1,4 @@
-<script setup>
-
-import CardOfItem from "../components/CardOfItem.vue";
-import ContactUs from "./ContactUs.vue";
+<script setup lang="ts">
 </script>
 <template>
 
@@ -18,11 +15,11 @@ import ContactUs from "./ContactUs.vue";
 
 
     <div class="introduction-container flex flex-row-reverse items-center justify-between w-4/5 m-auto py-40 gap-10">
-      <div class="max-w-[500px] text-white">
-        <h2 class="introduction-title text-3xl mb-5 text-justify sm:text-l">
+      <div class="max-w-[500px]">
+        <h2 class="introduction-title text-3xl mb-5 text-justify text-zinc-300 sm:text-l">
           Introducing IZ: The Ultimate Mobile Operating System for Cryptocurrency Security
         </h2>
-        <p class="introduction-desc text-xl text-justify sm:text-m">
+        <p class="introduction-desc text-xl text-justify text-zinc-400 sm:text-m">
           In the fast-paced digital world we live in today, privacy and security have become paramount concerns
           for individuals, especially when it comes to managing cryptocurrency assets. Meet IZ - a groundbreaking
           mobile operating system designed to provide unparalleled levels of privacy, security, and convenience
@@ -36,7 +33,7 @@ import ContactUs from "./ContactUs.vue";
 
     <div class="description_block flex flex-col justify-between items-center w-4/5 m-auto py-32">
       <img src="/characteristics.jpg" alt="characteristics" class="characteristics__image"/>
-      <p class="description_text text-justify text-white text-xl py-24">
+      <p class="description_text text-justify text-zinc-400 text-xl py-24">
         IZ is based on a General Mobile Phone. One of the key distinguishing features of IZ is its Bitcoin-friendly
         nature. As the popularity of cryptocurrencies, especially Bitcoin, continues to soar, the need for a secure
         platform to store, manage, and transact these digital assets has never been more critical. IZ not only meets
@@ -47,13 +44,13 @@ import ContactUs from "./ContactUs.vue";
 
     <div class="product_description__container flex flex-row justify-between items-center w-4/5 m-auto py-24">
       <div class="max-w-[500px]">
-        <p class="description text-justify text-white text-xl mb-10">
+        <p class="description text-justify text-zinc-400 text-xl mb-10">
           IZ leverages the power of blockchain technology to create a tamper-proof ledger of all transactions,
           providing users with full transparency and auditability over their cryptocurrency activities. By harnessing
           the decentralized nature of blockchain, IZ eliminates single points of failure and creates a trustless
           environment where users have full control over their funds at all times.
         </p>
-        <p class="text-justify text-white text-xl">
+        <p class="text-justify text-zinc-400 text-xl">
           In addition to its security features, IZ is designed to be user-friendly and accessible to individuals of all
           technical backgrounds. Whether you are a seasoned cryptocurrency investor or a newcomer to the world of
           digital assets, IZ provides a seamless and intuitive experience that empowers you to take full control of your

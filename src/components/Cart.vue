@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from "vue";
-import { useProductStore } from "../store.js";
+import { useProductStore } from "../store";
 
 const cartStore = useProductStore();
 
@@ -14,10 +14,10 @@ const totalPrice = computed(() => cartStore.getTheTotalPrice());
 </script>
 
 <template>
-  <li class="flex items-center gap-3 cursor-pointer text-gray-500 hover:text-slate-200 transition">
-    <img src="/cart.svg" alt="Cart" />
+  <div class="flex items-center gap-3 cursor-pointer text-inherit">
+    <img src="/cart.svg" alt="Cart" class="opacity-80" />
     <span class="cart-icon w-[50px] text-base lg:text-base">{{ totalPrice }}$</span>
-  </li>
+  </div>
 </template>
 
 <style scoped>

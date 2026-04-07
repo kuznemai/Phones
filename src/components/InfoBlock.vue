@@ -1,9 +1,9 @@
-<script setup>
-defineProps({
-  title: String,
-  description: String,
-  imageUrl: String,
-});
+<script setup lang="ts">
+defineProps<{
+  title: string;
+  description: string;
+  imageUrl: string;
+}>();
 </script>
 
 <template>

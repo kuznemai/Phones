@@ -1,12 +1,12 @@
-<script setup>
-import { useProductStore } from "../store.js";
+<script setup lang="ts">
+import { useProductStore } from "../store";
 import CartItem from "./CartItem.vue";
 
 const cartStore = useProductStore();
 </script>
 
 <template>
-  <div class="flex flex-col flex-1 gap-4 mt-8" v-auto-animate>
+  <div class="flex flex-col flex-1 gap-4" v-auto-animate>
     <CartItem
         v-for="item in cartStore.getAllItemsInCart"
         :item="item"

@@ -10,20 +10,6 @@ body{
   background-color: #000000;
 }
 
-.button_addtocart {
-  width: 104px;
-  height: 36px;
-  border: 1px solid #a6a6a6;
-  border-radius: 8px;
-  color: #ffffff;
-  background-color:#0C38D4;
-  font-size: 18px;
-}
-
-.button_addtocart:hover {
-  background-color: #102983;
-  transition: background-color 0.5s;
-}
 
 .grid-cols-auto-fit {
   display: grid;
