@@ -56,8 +56,8 @@ watch(activeTab, (tab) => {
 </script>
 
 <template>
-  <div class="min-h-screen px-6 md:px-10 py-10 text-white fade-in">
-    <div class="flex flex-col sm:flex-row sm:items-center gap-6 pb-8 border-b border-zinc-900">
+  <div class="min-h-screen px-4 py-8 text-white fade-in sm:px-6 md:px-10 md:py-10">
+    <div class="flex flex-col gap-6 border-b border-zinc-900 pb-8 sm:flex-row sm:items-center">
       <div
         class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0"
       >
@@ -84,7 +84,9 @@ watch(activeTab, (tab) => {
         <p class="text-zinc-600 text-sm mt-0.5">{{ userEmail || "No email set" }}</p>
       </div>
 
-      <div class="flex gap-6 sm:gap-8 shrink-0">
+      <div
+        class="flex w-full shrink-0 flex-wrap justify-center gap-4 sm:w-auto sm:justify-end sm:gap-6 md:gap-8"
+      >
         <div class="flex flex-col items-center">
           <span class="text-xl font-semibold text-white tabular-nums">{{ store.orders.length }}</span>
           <span class="text-[10px] uppercase tracking-wider text-zinc-600 mt-0.5">Orders</span>

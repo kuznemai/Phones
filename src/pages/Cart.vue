@@ -45,7 +45,7 @@ const goProfile = (): void => {
 </script>
 
 <template>
-  <div class="min-h-screen px-6 md:px-10 py-10 text-white fade-in">
+  <div class="min-h-screen px-4 py-8 text-white fade-in sm:px-6 md:px-10 md:py-10">
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-8 border-b border-zinc-900">
       <div>
         <p class="text-[10px] uppercase tracking-widest text-zinc-600 mb-2">Checkout</p>

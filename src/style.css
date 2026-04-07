@@ -6,8 +6,13 @@
   font-family:"Roboto Thin", sans-serif;
 }
 
-body{
+body {
   background-color: #000000;
+  overflow-x: clip;
+}
+
+html {
+  overflow-x: clip;
 }
 
 

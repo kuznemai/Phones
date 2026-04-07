@@ -81,7 +81,9 @@ onUnmounted(() => {
 
 <template>
   <!-- Hero + filters: left copy, right controls on large screens -->
-  <div class="px-6 md:px-10 pt-4 pb-6 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+  <div
+    class="flex flex-col gap-6 px-4 pb-6 pt-4 sm:px-6 md:gap-8 md:px-10 lg:flex-row lg:items-end lg:justify-between lg:gap-10"
+  >
     <div class="min-w-0 shrink">
       <p class="text-[10px] uppercase tracking-[0.25em] text-[#0C38D4] mb-1 font-medium">Catalogue</p>
       <h1 class="text-3xl text-white font-light mb-2">Our Devices</h1>

@@ -20,83 +20,124 @@ const logout = (): void => {
 </script>
 
 <template>
-  <header class="header-nav flex justify-between border-b border-slate-400 px-10 py-2 relative z-1">
-    <router-link to="/">
-      <div class="flex items-center gap-4">
-        <img class="h-12" src="/logo.svg" alt="IZ Operating System" />
-      </div>
-    </router-link>
+  <header class="header-nav relative z-[100] w-full border-b border-slate-400 bg-black">
+    <!-- Full viewport width; inner row uses horizontal padding only -->
+    <div
+      class="flex w-full items-center justify-between gap-2 px-4 py-2 sm:gap-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16"
+    >
+      <router-link to="/" class="shrink-0">
+        <div class="flex items-center gap-4">
+          <img class="h-9 w-auto sm:h-10 md:h-12" src="/logo.svg" alt="IZ Operating System" />
+        </div>
+      </router-link>
 
-    <!-- Навигация для десктопа -->
-    <nav class="flex items-center justify-between w-full max-w-6xl mx-auto hidden md:flex">
-
-      <div class="desktop-nav flex gap-6 flex-grow justify-center">
-        <router-link to="/" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">HOME</router-link>
-        <router-link to="/shop" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">SHOP</router-link>
-        <router-link to="/contact" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">CONTACT US</router-link>
-        <router-link to="/offer" class="text-gray-400 hover:text-slate-200 text-base md:text-sm lg:text-base">OUR OFFER</router-link>
-      </div>
-
-      <div class="nav-sidebar flex gap-6">
-        <router-link to="/cart" class="text-gray-500 hover:text-slate-200 transition flex items-center">
-          <Cart />
-        </router-link>
-        <router-link to="/favorites" class="text-gray-400 hover:text-slate-200 flex items-center gap-2">
-          <img src="/heart.svg" alt="Like" class="w-5 h-5" />
-          <span class="text-base md:text-sm lg:text-base">Favorites</span>
-        </router-link>
-        <router-link
-          v-if="isAuthenticated"
-          to="/profile"
-          class="text-gray-400 hover:text-slate-200 flex items-center gap-2 text-base"
-        >
-          <img src="/profile.svg" alt="" class="w-5 h-5" />
-          <span class="md:text-sm lg:text-base">Profile</span>
-        </router-link>
-        <router-link
-          v-else
-          to="/login"
-          class="text-gray-400 hover:text-slate-200 flex items-center gap-2 text-base md:text-sm lg:text-base"
-        >
-          <img src="/profile.svg" alt="" class="w-5 h-5 opacity-90" />
-          <span>Sign in</span>
-        </router-link>
-        <button
-          v-if="isAuthenticated"
-          type="button"
-          class="flex shrink-0 items-center gap-2 text-gray-400 hover:text-slate-200"
-          @click="logout"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            aria-hidden="true"
+      <nav class="mx-4 hidden min-w-0 flex-1 items-center justify-between lg:flex">
+        <div class="desktop-nav flex min-w-0 flex-grow justify-center gap-3 xl:gap-5 2xl:gap-7">
+          <router-link
+            to="/"
+            class="shrink-0 whitespace-nowrap text-sm text-gray-400 hover:text-slate-200 xl:text-base"
+            >HOME</router-link
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
-            />
-          </svg>
-          <span class="text-base md:text-sm lg:text-base">Log out</span>
-        </button>
-      </div>
-    </nav>
+          <router-link
+            to="/shop"
+            class="shrink-0 whitespace-nowrap text-sm text-gray-400 hover:text-slate-200 xl:text-base"
+            >SHOP</router-link
+          >
+          <router-link
+            to="/contact"
+            class="shrink-0 whitespace-nowrap text-sm text-gray-400 hover:text-slate-200 xl:text-base"
+            >CONTACT US</router-link
+          >
+          <router-link
+            to="/offer"
+            class="shrink-0 whitespace-nowrap text-sm text-gray-400 hover:text-slate-200 xl:text-base"
+            >OUR OFFER</router-link
+          >
+        </div>
 
-    <!-- Бургер-иконка (только для мобильных) -->
-    <div class="md:hidden flex items-center" @click="isMobileMenuOpen = !isMobileMenuOpen">
-      <img src="/burger-icon.svg" alt="burger-menu" class="w-8 h-8 cursor-pointer" />
+        <div
+          class="nav-sidebar flex shrink-0 flex-wrap items-center justify-end gap-2 md:gap-3 xl:gap-5"
+        >
+          <router-link to="/cart" class="flex shrink-0 items-center text-gray-500 transition hover:text-slate-200">
+            <Cart />
+          </router-link>
+          <router-link
+            to="/favorites"
+            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-gray-400 hover:text-slate-200 xl:gap-2"
+          >
+            <img src="/heart.svg" alt="" class="h-5 w-5" />
+            <span class="text-sm xl:text-base">Favorites</span>
+          </router-link>
+          <router-link
+            v-if="isAuthenticated"
+            to="/profile"
+            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-gray-400 hover:text-slate-200 xl:gap-2"
+          >
+            <img src="/profile.svg" alt="" class="h-5 w-5" />
+            <span class="text-sm xl:text-base">Profile</span>
+          </router-link>
+          <router-link
+            v-else
+            to="/login"
+            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-gray-400 hover:text-slate-200 xl:gap-2"
+          >
+            <img src="/profile.svg" alt="" class="h-5 w-5 opacity-90" />
+            <span class="text-sm xl:text-base">Sign in</span>
+          </router-link>
+          <button
+            v-if="isAuthenticated"
+            type="button"
+            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-gray-400 hover:text-slate-200 xl:gap-2"
+            @click="logout"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+              />
+            </svg>
+            <span class="text-sm xl:text-base">Log out</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="flex shrink-0 items-center lg:hidden" @click="isMobileMenuOpen = !isMobileMenuOpen">
+        <img src="/burger-icon.svg" alt="" class="h-8 w-8 cursor-pointer" role="presentation" />
+      </div>
     </div>
 
-    <!-- Мобильное меню -->
-    <div v-if="isMobileMenuOpen" class="burger_opened absolute top-0 left-0 w-full bg-gray-900 bg-opacity-90 p-6 flex flex-col gap-6 md:hidden">
-      <button @click="closeMenu" class="absolute top-4 right-4 text-white text-4xl">&times;</button>
+    <!-- Full-screen opaque overlay (fixed to viewport, not the narrow app column) -->
+    <div
+      v-if="isMobileMenuOpen"
+      class="burger_opened fixed inset-0 z-[250] flex flex-col bg-black lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menu"
+    >
+      <div class="flex items-center justify-between border-b border-zinc-800 px-4 py-3 sm:px-6">
+        <router-link to="/" class="flex items-center gap-3" @click="closeMenu">
+          <img class="h-9 w-auto" src="/logo.svg" alt="IZ Operating System" />
+        </router-link>
+        <button
+          type="button"
+          class="flex h-11 w-11 items-center justify-center text-3xl text-white hover:text-zinc-300"
+          aria-label="Close menu"
+          @click="closeMenu"
+        >
+          &times;
+        </button>
+      </div>
 
-      <ul class="flex flex-col gap-6 text-white text-lg items-start pl-6">
+      <ul class="flex flex-col gap-5 overflow-y-auto px-6 pb-10 pt-8 text-lg text-white">
         <router-link to="/" @click="closeMenu">
           <li class="cursor-pointer hover:text-slate-200">Home</li>
         </router-link>
@@ -110,20 +151,20 @@ const logout = (): void => {
           <li class="cursor-pointer hover:text-slate-200">Our offer</li>
         </router-link>
         <router-link to="/favorites" @click="closeMenu">
-          <li class="flex items-center gap-3 cursor-pointer hover:text-slate-200">
-            <img src="/heart.svg" alt="Like" class="w-6 h-6" />
+          <li class="flex cursor-pointer items-center gap-3 hover:text-slate-200">
+            <img src="/heart.svg" alt="" class="h-6 w-6" />
             <span>Favorites</span>
           </li>
         </router-link>
         <router-link v-if="isAuthenticated" to="/profile" @click="closeMenu">
-          <li class="flex items-center gap-3 cursor-pointer hover:text-slate-200">
-            <img src="/profile.svg" alt="" class="w-6 h-6" />
+          <li class="flex cursor-pointer items-center gap-3 hover:text-slate-200">
+            <img src="/profile.svg" alt="" class="h-6 w-6" />
             <span>Profile</span>
           </li>
         </router-link>
         <router-link v-else to="/login" @click="closeMenu">
-          <li class="flex items-center gap-3 cursor-pointer hover:text-slate-200">
-            <img src="/profile.svg" alt="" class="w-6 h-6 opacity-90" />
+          <li class="flex cursor-pointer items-center gap-3 hover:text-slate-200">
+            <img src="/profile.svg" alt="" class="h-6 w-6 opacity-90" />
             <span>Sign in</span>
           </li>
         </router-link>
@@ -151,11 +192,7 @@ const logout = (): void => {
             <span>Log out</span>
           </button>
         </li>
-        <router-link
-          to="/cart"
-          @click="closeMenu"
-          class="flex items-center gap-3 cursor-pointer hover:text-slate-200"
-        >
+        <router-link to="/cart" @click="closeMenu" class="flex cursor-pointer items-center gap-3 hover:text-slate-200">
           <Cart />
         </router-link>
       </ul>
@@ -163,71 +200,8 @@ const logout = (): void => {
   </header>
 </template>
 
-<style>
-* {
+<style scoped>
+.header-nav {
   font-family: "Roboto Thin", sans-serif;
-}
-@media (max-width: 550px) and (min-width: 320px) {
-  .burger_opened {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    text-align: left;
-    padding-left: 1.5rem;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 1000;
-  }
-  .header-nav {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-@media (max-width: 768px) and (min-width: 550px) {
-  .header-nav {
-    position: relative;
-    z-index: 1001;
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .burger_opened {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 1002;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    text-align: left;
-    padding-left: 1.5rem;
-  }
-}
-
-@media (max-width: 1024px) and (min-width: 768px) {
-
-  .header-nav {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .desktop-nav {
-    font-size: 14px;
-    gap: 14px;
-  }
-  .nav-sidebar {
-    gap: 10px;
-    font-size: 14px;
-  }
-}
-@media (max-width: 1280px) and (min-width: 1024px) {
-
 }
 </style>

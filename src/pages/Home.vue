@@ -2,19 +2,23 @@
 </script>
 <template>
 
-  <section class="main_page">
-    <div class="welcome_container block flex flex-row justify-center items-center gap-28 py-40 w-4/5 m-auto">
-      <div class="welcome_inner-text">
-        <h1 class="welcome__title fade-in text-5xl py-8 text-white sm:text-m">Fortress in Your Pocket</h1>
+  <section class="main_page overflow-x-hidden">
+    <div
+      class="welcome_container mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-8 px-4 py-16 sm:px-6 sm:py-20 md:gap-16 md:py-28 lg:flex-row lg:gap-20 lg:py-32 xl:gap-28 xl:py-40"
+    >
+      <div class="welcome_inner-text max-w-xl text-center lg:text-left">
+        <h1 class="welcome__title fade-in py-4 text-5xl text-white sm:text-m md:py-6 lg:py-8">Fortress in Your Pocket</h1>
         <p class="welcome__desc fade-in text-3xl text-white sm:text-m">Unbreakable Security for Your Peace of Mind</p>
       </div>
-      <div class="w-[400px] welcome_pic fade-in">
-        <img src="/white_phone.jpg"/>
+      <div class="welcome_pic fade-in w-full max-w-[400px] shrink-0">
+        <img src="/white_phone.jpg" alt="" class="h-auto w-full" />
       </div>
     </div>
 
 
-    <div class="introduction-container flex flex-row-reverse items-center justify-between w-4/5 m-auto py-40 gap-10">
+    <div
+      class="introduction-container mx-auto flex w-full max-w-6xl flex-row-reverse items-center justify-between gap-10 px-4 sm:px-6 lg:px-8"
+    >
       <div class="max-w-[500px]">
         <h2 class="introduction-title text-3xl mb-5 text-justify text-zinc-300 sm:text-l">
           Introducing IZ: The Ultimate Mobile Operating System for Cryptocurrency Security
@@ -31,7 +35,9 @@
       </div>
     </div>
 
-    <div class="description_block flex flex-col justify-between items-center w-4/5 m-auto py-32">
+    <div
+      class="description_block mx-auto flex w-full max-w-6xl flex-col items-center justify-between px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-32"
+    >
       <img src="/characteristics.jpg" alt="characteristics" class="characteristics__image"/>
       <p class="description_text text-justify text-zinc-400 text-xl py-24">
         IZ is based on a General Mobile Phone. One of the key distinguishing features of IZ is its Bitcoin-friendly
@@ -42,7 +48,9 @@
       </p>
     </div>
 
-    <div class="product_description__container flex flex-row justify-between items-center w-4/5 m-auto py-24">
+    <div
+      class="product_description__container mx-auto flex w-full max-w-6xl flex-row items-center justify-between px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24"
+    >
       <div class="max-w-[500px]">
         <p class="description text-justify text-zinc-400 text-xl mb-10">
           IZ leverages the power of blockchain technology to create a tamper-proof ledger of all transactions,
@@ -57,7 +65,11 @@
           financial future.
         </p>
       </div>
-      <img src="/s1-img2.jpg" alt="white_phone" class="product_description__image fade-in w-80"/>
+      <img
+        src="/s1-img2.jpg"
+        alt="white_phone"
+        class="product_description__image fade-in w-full max-w-[20rem] shrink-0"
+      />
     </div>
   </section>
 </template>
@@ -67,17 +79,58 @@
   font-family: "Roboto Thin", sans-serif;
 }
 
-/*Description*/
-
+/* Intro block: stacked on phones & laptops; wide desktop keeps side image */
 .introduction-container {
   position: relative;
-  padding: 200px 0;
 }
 
 .introduction__img {
-  position: absolute;
-  left: -290px;
-  /*box-shadow: 43px 38px 61px 0px rgba(255, 255, 255, 0.1);*/
+  position: relative;
+  left: auto;
+}
+
+@media (max-width: 1279px) {
+  .introduction-container {
+    flex-direction: column-reverse !important;
+    align-items: center;
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+  }
+
+  .introduction__img {
+    position: relative !important;
+    left: auto !important;
+    bottom: auto !important;
+    display: block;
+    width: 100%;
+    max-width: 40rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .introduction-container > div:first-child {
+    max-width: 42rem;
+    width: 100%;
+  }
+
+  .description_block {
+    margin-top: 0 !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .introduction-container {
+    flex-direction: row-reverse;
+    padding: 200px 0;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .introduction__img {
+    position: absolute;
+    left: -660px;
+    max-width: 900px;
+  }
 }
 
 
@@ -99,7 +152,7 @@
     width: 100%;
     font-size: 28px;
     font-family: "Roboto Thin", sans-serif;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .welcome__desc {
@@ -126,16 +179,14 @@
   }
 
   .introduction__img {
-    display: flex;
-    width: 320px;
-    left: 0;
-    bottom: -150px;
+    max-width: 100%;
   }
 
   .description_block {
     width: 100%;
-    margin: 270px 0 40px 0;
-    padding: 0;
+    margin: 2rem 0 1.5rem;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .description_text {
@@ -190,14 +241,6 @@
     max-width: 80%;
   }
 
-  .introduction-container {
-    padding-bottom: 100px;
-  }
-
-  .introduction__img {
-    display: none;
-  }
-
   .description_block {
     margin-top: 10px;
     padding: 0;
@@ -245,14 +288,6 @@
     max-width: 50%;
   }
 
-  .introduction-container {
-    padding: 0 0 100px 0;
-  }
-
-  .introduction__img {
-    display: none;
-  }
-
   .description_block {
     margin-top: 10px;
     padding: 0;
@@ -279,30 +314,11 @@
   }
 }
 
-@media (max-width: 1280px) and (min-width: 1024px) {
-  .introduction-container {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .introduction-container > div:first-child {
-    max-width: 400px;
-  }
-
-  .introduction__img {
-    left: -620px;
-  }
-
+@media (max-width: 1279px) and (min-width: 1024px) {
   .product_description__image {
-    width: 40%;
-    padding: 20px;
-  }
-}
-
-@media (max-width: 2000px) and  (min-width: 1280px) {
-  .introduction__img {
-    position: absolute;
-    left: -660px;
+    width: min(50%, 20rem);
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 

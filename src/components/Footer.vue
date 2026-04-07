@@ -29,8 +29,10 @@ const socialLinks = [
 </script>
 
 <template>
-  <footer class="footer mt-16 bg-black rounded-b-xl border-t border-slate-700 px-10 py-10">
-    <div class="footer__inner flex w-full min-w-0 flex-col gap-10">
+  <footer
+    class="footer mt-10 w-full border-t border-slate-700 bg-black px-4 py-8 sm:mt-12 sm:px-6 md:mt-16 md:px-8 md:py-10 lg:px-10 xl:px-12 2xl:px-16"
+  >
+    <div class="footer__inner mx-auto flex w-full min-w-0 max-w-[1920px] flex-col gap-10">
 
       <!-- Top row: logo + nav + social -->
       <div class="flex w-full min-w-0 flex-col items-start justify-between gap-8 md:flex-row md:items-center">
@@ -102,7 +104,7 @@ const socialLinks = [
 
       <!-- Divider: full-bleed to match footer top border width (cancel horizontal padding) -->
       <div
-        class="-mx-10 shrink-0 border-t border-slate-700"
+        class="-mx-4 shrink-0 border-t border-slate-700 sm:-mx-6 md:-mx-8 lg:-mx-10 xl:-mx-12 2xl:-mx-16"
         aria-hidden="true"
       ></div>
 

@@ -9,9 +9,13 @@ const showHeader = computed(() => route.name !== "Login");
 </script>
 
 <template>
-  <div class="bg-black w-4/5 m-auto rounded-xl shadow-xl mt-14 mb-14">
+  <div class="min-h-screen min-w-0 bg-black">
     <Header v-if="showHeader" />
-    <router-view></router-view>
+    <div
+      class="app-shell mx-auto mb-6 mt-4 min-w-0 w-full max-w-[1600px] rounded-xl bg-black px-3 shadow-xl sm:mb-8 sm:mt-6 sm:px-4 md:mb-12 md:mt-10 md:px-5 lg:mb-14 lg:mt-14 lg:px-7 xl:px-9"
+    >
+      <router-view></router-view>
+    </div>
     <Footer />
   </div>
 </template>

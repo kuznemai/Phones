@@ -105,7 +105,7 @@ function backToPhone(): void {
 </script>
 
 <template>
-  <div class="min-h-screen px-6 py-12 text-white fade-in md:px-10">
+  <div class="min-h-screen px-4 py-10 text-white fade-in sm:px-6 md:px-10 md:py-12">
     <div class="mx-auto max-w-md">
       <p class="mb-2 text-[10px] font-medium uppercase tracking-[0.28em] text-[#0C38D4]">Sign in</p>
       <h1 class="mb-2 text-2xl font-light md:text-3xl">Phone number</h1>

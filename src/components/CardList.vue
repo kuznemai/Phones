@@ -2,8 +2,6 @@
 import Card from "./Card.vue";
 import { useProductStore } from "../store";
 import type { Product } from "../store";
-import { getProductWindowUrl } from "../utils/productLink";
-
 withDefaults(
   defineProps<{
     items: Product[];
@@ -15,20 +13,19 @@ withDefaults(
 
 const productStore = useProductStore();
 
-const navigateToProduct = (id: number): void => {
-  window.open(getProductWindowUrl(id), "_blank");
-};
 </script>
 
 <template>
   <!-- Loading (search debounce) -->
-  <div v-if="loading" class="card-grid" aria-busy="true" aria-label="Loading results">
-    <div v-for="n in 8" :key="'sk-' + n" class="skeleton-card">
-      <div class="skeleton-card__media skeleton-shimmer" />
-      <div class="skeleton-card__body">
-        <div class="skeleton-line skeleton-line--lg skeleton-shimmer" />
-        <div class="skeleton-line skeleton-line--sm skeleton-shimmer" />
-        <div class="skeleton-line skeleton-line--btn skeleton-shimmer" />
+  <div v-if="loading" class="card-grid card-grid--results" aria-busy="true" aria-label="Loading results">
+    <div v-for="n in 8" :key="'sk-' + n" class="flex h-full min-h-0 flex-col">
+      <div class="skeleton-card flex h-full min-h-[280px] flex-col">
+        <div class="skeleton-card__media skeleton-shimmer" />
+        <div class="skeleton-card__body flex-1">
+          <div class="skeleton-line skeleton-line--lg skeleton-shimmer" />
+          <div class="skeleton-line skeleton-line--sm skeleton-shimmer" />
+          <div class="skeleton-line skeleton-line--btn skeleton-shimmer" />
+        </div>
       </div>
     </div>
   </div>
@@ -37,14 +34,13 @@ const navigateToProduct = (id: number): void => {
     <div
       v-for="(item, index) in items"
       :key="item.id"
-      class="shop-card-reveal"
+      class="shop-card-reveal flex h-full min-h-0 flex-col"
       :style="{ '--appear-delay': `${Math.min(index, 18) * 42}ms` }"
     >
       <Card
         :item="item"
         :is-favorite="item.isFavorite"
         @add-to-favorite="productStore.addToFavorite(item)"
-        @navigate-to-product="navigateToProduct(item.id)"
       />
     </div>
   </div>
@@ -72,13 +68,29 @@ const navigateToProduct = (id: number): void => {
 <style scoped>
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 16px;
-  padding: 28px 40px 40px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: 12px;
+  padding: 16px 12px 28px;
+}
+
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+    padding: 20px 20px 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+    padding: 28px 40px 40px;
+  }
 }
 
 .card-grid--results {
-  align-items: start;
+  align-items: stretch;
 }
 
 .shop-card-reveal {
@@ -99,13 +111,10 @@ const navigateToProduct = (id: number): void => {
 
 /* Skeletons */
 .skeleton-card {
-  display: flex;
-  flex-direction: column;
   border-radius: 1rem;
   border: 1px solid rgb(39 39 42);
   background: #0d0d0d;
   overflow: hidden;
-  min-height: 280px;
 }
 
 .skeleton-card__media {

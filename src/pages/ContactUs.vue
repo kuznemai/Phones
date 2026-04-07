@@ -55,7 +55,7 @@ const submitForm = (): void => {
 </script>
 
 <template>
-  <div class="fade-in px-6 pb-16 pt-8 text-white md:px-10">
+  <div class="fade-in px-4 pb-12 pt-6 text-white sm:px-6 md:px-10 md:pb-16 md:pt-8">
     <!-- Hero -->
     <header class="mb-12 max-w-2xl">
       <p class="mb-2 text-[10px] font-medium uppercase tracking-[0.28em] text-[#0C38D4]">
