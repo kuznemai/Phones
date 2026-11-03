@@ -30,7 +30,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     // The old technology page now lives at /security.
-    "/offer": { redirect: { to: "/security", statusCode: 301 } },
+    "/offer": { redirect: { to: withBase("/security"), statusCode: 301 } },
   },
 
   nitro: {

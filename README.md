@@ -123,6 +123,10 @@ Never put secrets in `NUXT_PUBLIC_*` variables: they are shipped to the browser.
 
 ## Deployment
 
+Live preview: https://kuznemai.github.io/Phones/ — deployed by
+`.github/workflows/pages.yml` on every push to `main` (and to `feature/storefront`
+while that branch is under review). Pages must be set to **Source: GitHub Actions**.
+
 The site has no server-side logic, so either output works:
 
 - `npm run generate` → static files in `.output/public` (GitHub Pages, any static host).
