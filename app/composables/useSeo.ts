@@ -1,7 +1,10 @@
+import { SITE } from "~/data/site";
+
 interface SeoInput {
+  /** Page title without the brand suffix; empty on the home page. */
   title: string;
   description: string;
-  /** Absolute or root-relative path of a representative image. */
+  /** Root-relative path of a representative image. */
   image?: string;
 }
 
@@ -12,19 +15,20 @@ interface SeoInput {
 export function useSeo({ title, description, image }: SeoInput): void {
   const route = useRoute();
   const siteUrl = useRuntimeConfig().public.siteUrl.replace(/\/$/, "");
-  const canonical = `${siteUrl}${route.path}`;
-  const ogImage = image ? `${siteUrl}${image}` : `${siteUrl}/hero-phone.png`;
+  const canonical = `${siteUrl}${route.path === "/" ? "/" : route.path.replace(/\/$/, "")}`;
+  const ogImage = `${siteUrl}${image ?? "/hero-phone.png"}`;
+  const socialTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — privacy-focused smartphones`;
 
   useSeoMeta({
-    title,
+    title: title || null,
     description,
-    ogTitle: title,
+    ogTitle: socialTitle,
     ogDescription: description,
     ogImage,
     ogUrl: canonical,
     ogType: "website",
     twitterCard: "summary_large_image",
-    twitterTitle: title,
+    twitterTitle: socialTitle,
     twitterDescription: description,
     twitterImage: ogImage,
   });

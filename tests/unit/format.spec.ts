@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatEta, formatPrice, ORDER_STATUS_LABELS } from "~/utils/format";
+import { formatEta, formatPrice, formatStorage } from "~/utils/format";
 
 describe("formatPrice", () => {
   it("renders whole amounts without decimals", () => {
@@ -16,17 +16,6 @@ describe("formatPrice", () => {
   });
 });
 
-describe("formatDate", () => {
-  it("formats an ISO date", () => {
-    expect(formatDate("2026-03-14T10:00:00.000Z")).toBe("14 Mar 2026");
-  });
-
-  it("never renders Invalid Date", () => {
-    expect(formatDate(null)).toBe("—");
-    expect(formatDate("not-a-date")).toBe("—");
-  });
-});
-
 describe("formatEta", () => {
   it("collapses an equal range", () => {
     expect(formatEta(2, 2)).toBe("2 days");
@@ -37,16 +26,9 @@ describe("formatEta", () => {
   });
 });
 
-describe("order status labels", () => {
-  it("covers every status in the domain model", () => {
-    expect(Object.keys(ORDER_STATUS_LABELS)).toEqual([
-      "created",
-      "awaiting_payment",
-      "paid",
-      "processing",
-      "shipped",
-      "delivered",
-      "cancelled",
-    ]);
+describe("formatStorage", () => {
+  it("switches to terabytes at 1024 GB", () => {
+    expect(formatStorage(512)).toBe("512 GB");
+    expect(formatStorage(1024)).toBe("1 TB");
   });
 });

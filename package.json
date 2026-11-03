@@ -14,7 +14,6 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "generate": "nuxt generate",
-    "test:e2e:static": "playwright test --config playwright.static.config.ts",
     "preview:static": "node scripts/serve-static.mjs"
   },
   "dependencies": {

@@ -1,68 +1,80 @@
 # Frontend → backend API contract
 
-Everything below is implemented today by the mock backend in `server/api`, and the
-frontend talks to it exclusively through `app/api/*`. When the real backend is ready,
-point `NUXT_PUBLIC_API_BASE` at it and delete `server/api` — no page, component or
-store has to change as long as these shapes hold.
+The storefront is frontend-only today. Every request it will eventually make goes
+through one of the modules in `app/services/`, which currently answer from local data
+(`app/data/`). This document lists what the backend has to provide so those modules can
+be switched to HTTP without touching pages, components or stores.
 
 TypeScript definitions for every payload live in [`shared/types/index.ts`](../shared/types/index.ts).
+The local implementations in `app/utils/catalog.ts` and `app/utils/cart.ts` are the
+reference behaviour (and are covered by unit tests in `tests/unit/`).
 
 ## Conventions
 
-- **Money** is always an integer in minor units (cents), field name ends in `Cents`.
+- **Money** is always an integer in minor units (cents); field names end in `Cents`.
   `currency` is an ISO-4217 code (`"USD"` today).
 - **Dates** are ISO-8601 UTC strings.
-- **Authentication** is a session cookie: `Set-Cookie: iz_session=…; HttpOnly; SameSite=Lax; Secure`.
-  The frontend sends `credentials: "include"` and never reads or stores a token.
-- **Errors** use the standard `{ statusCode, statusMessage, data? }` body.
-  For form validation return `422` with `data.fields = { <fieldName>: <message> }`;
-  the frontend maps those onto the matching inputs (`app/utils/api-error.ts`).
+- **Errors** use a `{ statusCode, statusMessage, data? }` body. For form validation return
+  `422` with `data.fields = { <fieldName>: <message> }` so messages can be shown next to
+  the matching inputs.
 
-| Status | Frontend behaviour |
+| Status | Expected frontend behaviour |
 | --- | --- |
-| `401` | Route middleware sends the visitor to `/login?redirect=…` |
-| `404` | Renders the app's 404 page |
-| `409` | Shown as an inline message (e.g. "already paid", "out of stock") |
+| `404` | Product page renders the 404 page |
+| `409` | Inline message (for example "out of stock") |
 | `422` | Field errors highlighted in the form |
-| `5xx` | Error state with a "Try again" button |
+| `5xx` | Error state with a "Try again" button (already present on catalog, cart and home) |
 
 ---
 
-## Catalogue — public
+## Catalog — public
 
-### `GET /products`
+### `GET /products` → `fetchProducts(query)`
 
-Query: `search?: string`, `sort?: "title" | "price" | "-price"`.
+Query: `search?`, `sort?` (`featured` · `price-asc` · `price-desc` · `name`),
+`storage?` (comma-separated GB), `color?` (comma-separated names), `size?`
+(`compact` · `standard` · `large`), `stock?` (`1` = in stock only).
 
 ```jsonc
 { "items": ProductListItem[], "total": number }
 ```
 
-`ProductListItem`: `{ id, slug, title, tagline, image, fromPriceCents, inStock, badge? }`.
-`fromPriceCents` is the cheapest variant. `inStock` is true when any variant has stock.
+`ProductListItem`: `{ id, slug, title, tagline, image, fromPriceCents, inStock,
+displayInches, batteryMah, storageOptionsGb[], colors[{ name, hex }], badge? }`.
+`fromPriceCents` is the cheapest variant **that matches the filters**.
 
-### `GET /products/:slug`
+### `GET /products?featured=1` → `fetchFeaturedProducts(limit)`
 
-Returns a `Product`: the list fields plus `description`, `highlights[]`, `images[]`,
-`specs[] ({ label, value })` and `variants[]`.
+Same item shape; products flagged for the home page.
 
-`ProductVariant`: `{ id, storageGb, color, colorHex, priceCents, stock }`.
-`stock` is a number so the UI can show "only N left"; `0` disables ordering.
+### `GET /products/facets` → `fetchCatalogFacets()`
 
-### `GET /catalog/delivery-options`
+`{ storage: number[], colors: [{ name, hex }], sizes: SizeClass[] }` — the values the
+filter panel offers.
 
-`DeliveryOption[]`: `{ id: "standard" | "express" | "pickup", title, description, priceCents, etaDaysMin, etaDaysMax }`.
+### `GET /products/:slug` → `fetchProduct(slug)`
+
+A `Product`: list fields plus `description`, `highlights[]`, `images[]`,
+`specs[] ({ label, value })` and `variants[]`. Unknown slug → `404`.
+
+`ProductVariant`: `{ id, storageGb, color, colorHex, priceCents, stock }`. `stock` is a
+number so the UI can show "only N left"; `0` disables ordering.
+
+### `GET /catalog/delivery-options` → `fetchDeliveryOptions()`
+
+`DeliveryOption[]`: `{ id: "standard" | "express" | "pickup", title, description,
+priceCents, etaDaysMin, etaDaysMax }`. The options in `app/data/delivery.ts` are samples.
 
 ---
 
 ## Cart — public
 
-### `POST /cart/preview`
+### `POST /cart/preview` → `previewCart(items, deliveryMethodId?)`
 
-The client stores only ids and quantities; **every amount comes from the server.**
+The browser stores only ids and quantities (`localStorage["iz.cart.v1"]`); **every amount
+comes from the server.**
 
 Request: `{ items: [{ productId, variantId, quantity }], deliveryMethodId? }`
-Response: `CartPreview`
 
 ```jsonc
 {
@@ -70,138 +82,48 @@ Response: `CartPreview`
               "unitPriceCents", "quantity", "lineTotalCents",
               "available": true, "maxQuantity": 10 }],
   "unavailableCount": 0,
-  "totals": { "currency": "USD", "subtotalCents", "deliveryCents", "discountCents", "totalCents" }
+  "itemCount": 1,
+  "totals": { "currency": "USD", "subtotalCents", "deliveryCents", "totalCents" }
 }
 ```
 
-Unknown products are dropped silently; out-of-stock lines come back with
-`available: false` and `lineTotalCents: 0` so the shopper is told what to remove.
+- Unknown products/variants are dropped; the client removes them from its stored cart.
+- Quantities are clamped to `1…min(stock, 10)`; the client adopts the clamped value.
+- Out-of-stock lines come back with `available: false` and `lineTotalCents: 0`; checkout
+  stays disabled until they are removed.
+- Delivery is charged only when the subtotal is above zero.
 
 ---
 
-## Auth
+## Orders — not connected yet
 
-| Method | URL | Body | Response |
-| --- | --- | --- | --- |
-| `POST` | `/auth/register` | `{ name, email, password }` | `User` + session cookie |
-| `POST` | `/auth/login` | `{ email, password }` | `User` + session cookie |
-| `POST` | `/auth/logout` | — | `{ ok: true }`, cookie cleared |
-| `GET` | `/auth/me` | — | `{ user: User \| null }` |
-| `PATCH` | `/auth/me` | `{ name, email, phone }` | `User` (401 for guests) |
+### `POST /orders` → `submitOrder(request)`
 
-`User`: `{ id, email, name, phone: string | null, createdAt }`.
+Request (`OrderRequest`): `{ items: CartItemInput[], deliveryMethodId, address: ShippingAddress }`.
 
-`GET /auth/me` must return `200 { user: null }` for a guest rather than `401` —
-the app renders public pages for anonymous visitors during SSR.
+`ShippingAddress`: `{ fullName, email, phone, country, city, street, postalCode, comment }`.
+The checkout validates these on the client (`app/utils/validation.ts`); the backend must
+validate again and answer `422` with field messages.
 
-Register/login validation errors are `422` with `data.fields` keyed by
-`name` / `email` / `password`. A wrong password is `401 "Wrong email or password"`.
+Response (`OrderSubmission`): `{ status: "created", orderId }`. Today the local
+implementation always returns `{ status: "unavailable", message }` and does not send,
+log or store anything. The checkout page already handles both outcomes.
 
-**Not implemented yet:** password recovery (needs transactional email) and email
-verification. The sign-in page links to them as a placeholder.
+Payment is intentionally absent from the preview; it should be added together with the
+order service (a hosted payment page or provider widget — card data must never pass
+through this frontend).
 
----
+## Support — not connected yet
 
-## Orders — authenticated
+### `POST /support/messages` → `sendSupportMessage(message)`
 
-### `GET /orders`
-
-`OrderListItem[]`, newest first: `{ id, number, createdAt, status, totalCents, currency, itemCount, previewImages[] }`.
-
-### `POST /orders`
-
-```jsonc
-{
-  "items": [{ "productId", "variantId", "quantity" }],
-  "deliveryMethodId": "standard",
-  "paymentMethodId": "card" | "crypto" | "on_delivery",
-  "address": { "fullName", "phone", "email", "country", "city", "street", "postalCode", "comment"? }
-}
-```
-
-The backend **must re-price the order from the ids** and ignore any amount the client
-might send. Returns the created `Order`.
-
-- `400` empty cart
-- `409` an item went out of stock between cart and checkout
-- `422` address validation, `data.fields` keyed by the address field names
-
-New orders start at `awaiting_payment`, or `created` when `paymentMethodId` is `on_delivery`.
-
-### `GET /orders/:id`
-
-Full `Order`: `{ id, number, createdAt, updatedAt, status, items[], totals, delivery, payment, address }`.
-Must 404 for an order belonging to a different user.
-
-`OrderStatus`: `created | awaiting_payment | paid | processing | shipped | delivered | cancelled`.
-
-### `POST /orders/:id/cancel`
-
-Allowed only while the status is `created` or `awaiting_payment`, otherwise `409`.
-Returns the updated `Order`.
-
----
-
-## Delivery tracking — authenticated
-
-### `GET /orders/:id/tracking`
-
-```jsonc
-{
-  "orderId", "orderNumber", "status",
-  "carrier": "IZ Logistics" | null,
-  "trackingNumber": string | null,
-  "expectedDeliveryAt": string | null,
-  "events": [{ "status", "title", "description", "at": string | null, "done": boolean }]
-}
-```
-
-The frontend renders `events` as-is, in order — the backend decides the steps and their
-copy. `at: null` marks a step that has not happened yet. A never-past
-`expectedDeliveryAt` is expected for orders still in flight.
-
-**Not implemented:** a real carrier integration. Today the events are derived from the
-order status.
-
----
-
-## Payments — authenticated
-
-### `POST /payments`
-
-Request `{ orderId }`, response `Payment`:
-
-```jsonc
-{ "id", "orderId", "orderNumber", "methodId", "status": "pending",
-  "amountCents", "currency", "redirectUrl", "createdAt", "updatedAt" }
-```
-
-`redirectUrl` is where the shopper is sent to pay. In the mock it is an in-app page
-(`/payment/:id`); with a real provider it becomes the provider's hosted URL and the
-frontend flow does not change. Repeating the call for an order that already has a
-pending payment returns the same payment.
-
-- `409` order already paid or cancelled
-
-### `GET /payments/:id`
-
-Returns the `Payment`. `PaymentStatus`: `pending | paid | failed | cancelled`.
-
-### `POST /payments/:id/complete` — **mock only**
-
-Exists purely so the success / failure / cancelled screens are reachable without a
-provider. With a real PSP this is replaced by a provider webhook to the backend, and
-the frontend only reads `GET /payments/:id` after the redirect back.
-
-**Card data is never collected by this frontend** and must stay that way — the provider
-owns that form.
+Request: `{ name, email, topic, message }`. Response: `{ status: "sent" }`. Today the local
+implementation returns `{ status: "unavailable", message }` without sending anything.
 
 ---
 
 ## What the backend owns (the frontend must not be trusted)
 
-- Order totals, delivery prices and discounts
-- Stock and availability
-- Order and payment status transitions
-- Whether the current user may see an order or payment
-- Session lifetime and revocation
+- Prices, stock and delivery fees — the client only sends ids and quantities.
+- Validation of contact and address data.
+- Order numbers, order state and payment state.

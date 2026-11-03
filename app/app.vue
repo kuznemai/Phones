@@ -1,14 +1,14 @@
 <script setup lang="ts">
-const config = useRuntimeConfig();
+import { SITE } from "~/data/site";
 
 useHead({
-  titleTemplate: (title) => (title ? `${title} — IZ Secure` : "IZ Secure"),
+  titleTemplate: (title) => (title ? `${title} — ${SITE.name}` : `${SITE.name} — privacy-focused smartphones`),
   meta: [{ name: "theme-color", content: "#05070d" }],
 });
 
 useSeoMeta({
-  ogSiteName: "IZ Secure",
-  ogUrl: config.public.siteUrl,
+  ogSiteName: SITE.name,
+  ogLocale: "en_US",
 });
 </script>
 

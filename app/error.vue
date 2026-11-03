@@ -8,28 +8,31 @@ const isNotFound = computed(() => props.error.statusCode === 404);
 const title = computed(() => (isNotFound.value ? "Page not found" : "Something went wrong"));
 const description = computed(() =>
   isNotFound.value
-    ? "The page you were looking for has moved or never existed."
-    : props.error.statusMessage || "An unexpected error occurred. Please try again.",
+    ? "The page you were looking for does not exist or has moved. Try the catalog or go back to the home page."
+    : "An unexpected error occurred. Please try again in a moment.",
 );
 
-useHead({ title: title.value });
+useHead({ title: `${title.value} — IZ Secure`, meta: [{ name: "robots", content: "noindex" }] });
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col bg-[var(--iz-bg)]">
+    <a href="#main" class="skip-link">Skip to content</a>
     <AppHeader />
 
-    <main class="flex flex-1 items-center">
+    <main id="main" class="flex flex-1 items-center" tabindex="-1">
       <div class="iz-wrap iz-wrap--narrow py-20 text-center">
         <p class="iz-eyebrow">Error {{ error.statusCode }}</p>
         <h1 class="iz-h2 mx-auto max-w-[18ch]">{{ title }}</h1>
         <p class="iz-lead mx-auto text-center">{{ description }}</p>
 
         <div class="mt-9 flex flex-wrap justify-center gap-3">
-          <button type="button" class="iz-btn iz-btn--solid" @click="clearError({ redirect: '/' })">
-            Back to the store
+          <button type="button" class="iz-btn iz-btn--solid" @click="clearError({ redirect: '/shop' })">
+            Browse the catalog
           </button>
-          <NuxtLink to="/shop" class="iz-btn iz-btn--ghost" @click="clearError()">Browse devices</NuxtLink>
+          <button type="button" class="iz-btn iz-btn--ghost" @click="clearError({ redirect: '/' })">
+            Go to the home page
+          </button>
         </div>
       </div>
     </main>

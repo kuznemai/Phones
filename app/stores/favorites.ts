@@ -1,9 +1,10 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
+import { readStoredJson, writeStoredJson } from "~/utils/storage";
 
-const STORAGE_KEY = "iz.favorites.v1";
+export const FAVORITES_STORAGE_KEY = "iz.favorites.v1";
 
-/** Saved products. A browser-local preference, never sent to the server. */
+/** Saved products. A browser-local preference that never leaves the device. */
 export const useFavoritesStore = defineStore("favorites", () => {
   const ids = ref<string[]>([]);
   const isHydrated = ref(false);
@@ -17,23 +18,17 @@ export const useFavoritesStore = defineStore("favorites", () => {
     ids.value = has(productId) ? ids.value.filter((id) => id !== productId) : [...ids.value, productId];
   }
 
-  function hydrate(): void {
-    if (isHydrated.value) return;
+  function hydrate(force = false): void {
+    if (isHydrated.value && !force) return;
     isHydrated.value = true;
-    try {
-      const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
-      if (Array.isArray(parsed)) ids.value = parsed.filter((id): id is string => typeof id === "string");
-    } catch {
-      ids.value = [];
-    }
+    const stored = readStoredJson(FAVORITES_STORAGE_KEY);
+    ids.value = Array.isArray(stored)
+      ? [...new Set(stored.filter((id): id is string => typeof id === "string" && id.length <= 100))].slice(0, 100)
+      : [];
   }
 
   function persist(): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(ids.value));
-    } catch {
-      // Ignore storage failures — favourites are a convenience, not state we own.
-    }
+    writeStoredJson(FAVORITES_STORAGE_KEY, ids.value);
   }
 
   return { ids, count, has, toggle, hydrate, persist };

@@ -1,28 +1,25 @@
 <script setup lang="ts">
+import { DEMO_NOTICE, SITE } from "~/data/site";
+
 const currentYear = new Date().getFullYear();
 
-const NAV = [
-  { label: "Home", to: "/" },
-  { label: "Devices", to: "/shop" },
-  { label: "Technology", to: "/offer" },
-  { label: "Support", to: "/contact" },
-];
-
-const SOCIAL = [
+const COLUMNS = [
   {
-    label: "Telegram",
-    href: "https://t.me/",
-    path: "M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 13.593l-2.963-.924c-.644-.204-.657-.644.135-.953l11.57-4.461c.537-.194 1.006.131.832.966z",
+    title: "Shop",
+    links: [
+      { label: "Catalog", to: "/shop" },
+      { label: "Saved devices", to: "/favorites" },
+      { label: "Cart", to: "/cart" },
+    ],
   },
   {
-    label: "X",
-    href: "https://x.com/",
-    path: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.264 5.636L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z",
-  },
-  {
-    label: "GitHub",
-    href: "https://github.com/",
-    path: "M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z",
+    title: "Learn",
+    links: [
+      { label: "Security & OS", to: "/security" },
+      { label: "About", to: "/about" },
+      { label: "FAQ", to: "/faq" },
+      { label: "Contact", to: "/contact" },
+    ],
   },
 ];
 </script>
@@ -31,39 +28,34 @@ const SOCIAL = [
   <footer class="site-footer">
     <div class="iz-wrap">
       <div class="site-footer__top">
-        <NuxtLink to="/" class="site-footer__brand" aria-label="IZ Secure — home">
-          <img src="/iz-logo-white.png" alt="" width="160" height="93" >
-        </NuxtLink>
-
-        <nav class="site-footer__nav" aria-label="Footer">
-          <NuxtLink v-for="link in NAV" :key="link.to" :to="link.to">{{ link.label }}</NuxtLink>
-        </nav>
-
-        <div class="site-footer__social">
-          <a
-            v-for="social in SOCIAL"
-            :key="social.label"
-            :href="social.href"
-            target="_blank"
-            rel="noopener noreferrer"
-            :aria-label="social.label"
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path :d="social.path" />
-            </svg>
-          </a>
+        <div class="site-footer__intro">
+          <NuxtLink to="/" class="site-footer__brand" :aria-label="`${SITE.name} — home`">
+            <img src="/iz-logo-white.png" alt="" width="160" height="93" loading="lazy">
+          </NuxtLink>
+          <p>{{ SITE.motto }}</p>
         </div>
 
-        <nav class="site-footer__legal" aria-label="Legal">
-          <NuxtLink to="/contact">Privacy</NuxtLink>
-          <NuxtLink to="/contact">Terms</NuxtLink>
-          <NuxtLink to="/contact">Contact</NuxtLink>
+        <nav v-for="column in COLUMNS" :key="column.title" class="site-footer__col" :aria-label="column.title">
+          <h2>{{ column.title }}</h2>
+          <ul>
+            <li v-for="link in column.links" :key="link.to">
+              <NuxtLink :to="link.to">{{ link.label }}</NuxtLink>
+            </li>
+          </ul>
         </nav>
       </div>
 
+      <p class="site-footer__demo">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+          <path d="M12 11v5m0-8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        {{ DEMO_NOTICE.short }}
+      </p>
+
       <div class="site-footer__bottom">
-        <span>Technology for a more open future.</span>
-        <span>&copy; {{ currentYear }} IZ Secure. All rights reserved.</span>
+        <span>&copy; {{ currentYear }} {{ SITE.name }}</span>
+        <span>Your cart and saved devices stay in this browser.</span>
       </div>
     </div>
   </footer>
@@ -73,79 +65,77 @@ const SOCIAL = [
 .site-footer {
   margin-top: auto;
   border-top: 1px solid var(--iz-border-soft);
-  padding-block: clamp(2rem, 3.5vw, 3rem) clamp(1.5rem, 2.5vw, 2rem);
+  padding-block: clamp(2.5rem, 4vw, 3.5rem) clamp(1.5rem, 2.5vw, 2rem);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.015), rgb(255 255 255 / 0));
 }
 
 .site-footer__top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: clamp(1.25rem, 3vw, 2.5rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+  gap: clamp(1.75rem, 4vw, 4rem);
+}
+
+.site-footer__intro p {
+  max-width: 28ch;
+  margin-top: 1rem;
+  color: var(--iz-muted);
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.site-footer__brand {
+  display: inline-block;
 }
 
 .site-footer__brand img {
-  height: clamp(2.2rem, 3.2vw, 3rem);
+  height: clamp(2.2rem, 3vw, 2.8rem);
   width: auto;
 }
 
-.site-footer__nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: clamp(1.1rem, 2.4vw, 2.5rem);
+.site-footer__col h2 {
+  color: var(--iz-faint);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
-.site-footer__nav a {
+.site-footer__col ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.85rem;
+}
+
+.site-footer__col a {
+  display: inline-block;
+  padding-block: 0.35rem;
   color: #dfe8f2;
-  font-size: clamp(0.82rem, 0.98vw, 0.92rem);
+  font-size: 0.92rem;
   transition: color 0.2s ease;
 }
 
-.site-footer__nav a:hover {
+.site-footer__col a:hover {
   color: var(--iz-accent);
 }
 
-.site-footer__social {
+.site-footer__demo {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: clamp(2rem, 3vw, 2.75rem);
+  color: var(--iz-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
 }
 
-.site-footer__social a {
-  display: inline-flex;
-  height: 2.5rem;
-  width: 2.5rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  color: #7e93a9;
-  transition: color 0.2s ease;
-}
-
-.site-footer__social a:hover {
-  color: var(--iz-accent);
-}
-
-.site-footer__social svg {
-  width: 1.2rem;
-  height: 1.2rem;
-}
-
-.site-footer__legal {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.9rem, 1.8vw, 1.75rem);
-}
-
-.site-footer__legal a {
-  color: #7e93a9;
-  font-size: clamp(0.76rem, 0.9vw, 0.85rem);
-  transition: color 0.2s ease;
-}
-
-.site-footer__legal a:hover {
-  color: #dfe8f2;
+.site-footer__demo svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--iz-warning);
 }
 
 .site-footer__bottom {
@@ -153,12 +143,21 @@ const SOCIAL = [
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: clamp(1.5rem, 2.5vw, 2.25rem);
-  padding-top: clamp(1rem, 1.8vw, 1.5rem);
+  gap: 0.5rem 1.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--iz-border-soft);
-  color: #6f8095;
-  font-size: clamp(0.72rem, 0.85vw, 0.8rem);
-  font-weight: 300;
+  color: var(--iz-faint);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 640px) {
+  .site-footer__top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-footer__intro {
+    grid-column: 1 / -1;
+  }
 }
 </style>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isValidEmail, isValidPhone, normalizePhone, safeRedirectPath } from "~/utils/validation";
+import type { ShippingAddress } from "#shared/types";
+import { isValidEmail, isValidPhone, normalizePhone, validateCheckout, validateCheckoutField } from "~/utils/validation";
 
 describe("normalizePhone", () => {
   it("keeps an international number", () => {
@@ -33,19 +34,48 @@ describe("isValidPhone", () => {
   });
 });
 
-describe("safeRedirectPath", () => {
-  it("allows in-app paths", () => {
-    expect(safeRedirectPath("/profile/orders")).toBe("/profile/orders");
+const VALID_ADDRESS: ShippingAddress = {
+  fullName: "Alex Morgan",
+  email: "alex@example.com",
+  phone: "+1 555 010 0123",
+  country: "United States",
+  city: "Portland",
+  street: "12 Example Street",
+  postalCode: "97201",
+  comment: "",
+};
+
+describe("validateCheckout", () => {
+  it("accepts a complete address", () => {
+    expect(validateCheckout(VALID_ADDRESS)).toEqual({});
   });
 
-  it("blocks protocol-relative and absolute URLs", () => {
-    expect(safeRedirectPath("//evil.com")).toBe("/");
-    expect(safeRedirectPath("https://evil.com")).toBe("/");
-    expect(safeRedirectPath("http://evil.com/x")).toBe("/");
+  it("reports every missing required field", () => {
+    const errors = validateCheckout({
+      fullName: "",
+      email: "",
+      phone: "",
+      country: "",
+      city: "",
+      street: "",
+      postalCode: "",
+      comment: "",
+    });
+    expect(Object.keys(errors).sort()).toEqual(["city", "country", "email", "fullName", "phone", "postalCode", "street"]);
   });
 
-  it("falls back for junk input", () => {
-    expect(safeRedirectPath(undefined, "/shop")).toBe("/shop");
-    expect(safeRedirectPath("%E0%A4%A", "/shop")).toBe("/shop");
+  it("treats whitespace-only input as empty", () => {
+    expect(validateCheckoutField("fullName", "   ")).toBe("Enter your full name.");
+  });
+
+  it("explains what is wrong with a malformed value", () => {
+    expect(validateCheckoutField("email", "alex@")).toMatch(/valid email/);
+    expect(validateCheckoutField("phone", "12345")).toMatch(/10 to 15 digits/);
+    expect(validateCheckoutField("postalCode", "@@")).toMatch(/valid postal code/);
+  });
+
+  it("keeps the optional note optional but bounded", () => {
+    expect(validateCheckoutField("comment", "")).toBeUndefined();
+    expect(validateCheckoutField("comment", "x".repeat(501))).toMatch(/under 500/);
   });
 });

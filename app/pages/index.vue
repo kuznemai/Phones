@@ -1,20 +1,35 @@
 <script setup lang="ts">
+import { SITE } from "~/data/site";
+
 useSeo({
-  title: "Smartphones with a privacy-first OS",
-  description:
-    "IZ builds smartphones around a hardened operating system: verified boot, per-app permissions and encrypted storage by default. No telemetry, no vendor lock-in.",
+  title: "",
+  description: SITE.description,
+});
+
+useHead({
+  script: [
+    {
+      type: "application/ld+json",
+      innerHTML: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: SITE.name,
+        url: useRuntimeConfig().public.siteUrl,
+        slogan: SITE.motto,
+      }),
+    },
+  ],
 });
 </script>
 
 <template>
   <div class="overflow-x-clip">
     <LandingHeroSection />
+    <LandingPopularSection />
     <LandingWhySection />
     <LandingExperienceSection />
     <LandingHardwareSection />
-    <LandingCompareSection />
-    <LandingAudienceSection />
-    <LandingFaqSection />
+    <LandingFaqPreviewSection />
     <LandingCtaSection />
   </div>
 </template>

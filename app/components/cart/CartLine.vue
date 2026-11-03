@@ -12,8 +12,8 @@ const emit = defineEmits<{
 
 <template>
   <li class="line" :class="{ 'line--unavailable': !line.available }">
-    <NuxtLink :to="`/product/${line.slug}`" class="line__media">
-      <img :src="assetUrl(line.image)" :alt="line.title" width="72" height="96" loading="lazy" >
+    <NuxtLink :to="`/product/${line.slug}`" class="line__media" tabindex="-1" aria-hidden="true">
+      <UiSafeImage :src="line.image" alt="" :width="96" :height="96" />
     </NuxtLink>
 
     <div class="line__body">
@@ -23,20 +23,29 @@ const emit = defineEmits<{
             <NuxtLink :to="`/product/${line.slug}`">{{ line.title }}</NuxtLink>
           </h3>
           <p class="line__variant">{{ line.variantLabel }}</p>
-          <p v-if="!line.available" class="line__warning">Out of stock — remove it to continue</p>
+          <p v-if="!line.available" class="line__warning">Out of stock. Remove it to continue.</p>
+          <p v-else-if="line.quantity >= line.maxQuantity" class="line__limit">Maximum available quantity</p>
         </div>
 
-        <p class="line__total">{{ formatPrice(line.available ? line.lineTotalCents : 0) }}</p>
+        <p class="line__total" data-testid="line-total">{{ formatPrice(line.available ? line.lineTotalCents : 0) }}</p>
       </div>
 
       <div v-if="!readonly" class="line__controls">
         <UiQuantityStepper
+          v-if="line.available"
           :model-value="line.quantity"
           :max="Math.max(1, line.maxQuantity)"
+          :label="`Quantity of ${line.title}`"
           @update:model-value="emit('update:quantity', $event)"
         />
         <span class="line__unit">{{ formatPrice(line.unitPriceCents) }} each</span>
-        <button type="button" class="line__remove" :aria-label="`Remove ${line.title}`" @click="emit('remove')">
+        <button
+          type="button"
+          class="line__remove"
+          :aria-label="`Remove ${line.title}, ${line.variantLabel}`"
+          @click="emit('remove')"
+        >
+          <UiIcon name="trash" />
           Remove
         </button>
       </div>
@@ -63,7 +72,7 @@ const emit = defineEmits<{
 .line__media {
   display: flex;
   height: 6rem;
-  width: 4.5rem;
+  width: 6rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
@@ -72,10 +81,11 @@ const emit = defineEmits<{
   background: #000;
 }
 
-.line__media img {
+.line__media :deep(img) {
   max-height: 90%;
   max-width: 90%;
   width: auto;
+  height: auto;
   object-fit: contain;
 }
 
@@ -112,6 +122,12 @@ const emit = defineEmits<{
   font-size: 0.8rem;
 }
 
+.line__limit {
+  margin-top: 0.35rem;
+  color: var(--iz-muted);
+  font-size: 0.8rem;
+}
+
 .line__total {
   flex-shrink: 0;
   color: #fff;
@@ -134,16 +150,24 @@ const emit = defineEmits<{
 }
 
 .line__remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   margin-left: auto;
-  min-height: 2.25rem;
+  min-height: 2.75rem;
   padding-inline: 0.5rem;
-  color: #7e93a9;
-  font-size: 0.82rem;
+  color: #9aabbd;
+  font-size: 0.85rem;
   transition: color 0.2s ease;
 }
 
 .line__remove:hover {
   color: #fca5a5;
+}
+
+.line__remove svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 @media (max-width: 480px) {

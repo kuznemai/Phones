@@ -7,9 +7,10 @@ const isOverlayHeader = computed(() => route.path === "/");
 
 <template>
   <div class="relative flex min-h-screen flex-col bg-[var(--iz-bg)]">
+    <a href="#main" class="skip-link">Skip to content</a>
     <AppHeader :overlay="isOverlayHeader" />
 
-    <main class="min-w-0 flex-1">
+    <main id="main" class="min-w-0 flex-1" tabindex="-1">
       <slot />
     </main>
 

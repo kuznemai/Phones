@@ -14,12 +14,12 @@ withDefaults(
 
 <template>
   <div class="summary">
-    <h2 class="summary__title">{{ title }}</h2>
+    <h2 class="summary__title" data-testid="summary-title">{{ title }}</h2>
 
     <dl class="summary__rows">
       <div class="summary__row">
         <dt>Subtotal</dt>
-        <dd>{{ formatPrice(totals.subtotalCents, totals.currency) }}</dd>
+        <dd data-testid="cart-subtotal">{{ formatPrice(totals.subtotalCents, totals.currency) }}</dd>
       </div>
       <div class="summary__row">
         <dt>Delivery</dt>
@@ -27,10 +27,6 @@ withDefaults(
           <template v-if="totals.deliveryCents > 0">{{ formatPrice(totals.deliveryCents, totals.currency) }}</template>
           <template v-else>{{ deliveryHint || "Free" }}</template>
         </dd>
-      </div>
-      <div v-if="totals.discountCents > 0" class="summary__row">
-        <dt>Discount</dt>
-        <dd>−{{ formatPrice(totals.discountCents, totals.currency) }}</dd>
       </div>
     </dl>
 

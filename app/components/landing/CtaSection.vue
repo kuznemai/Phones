@@ -1,32 +1,24 @@
 <script setup lang="ts"></script>
 
 <template>
-  <section class="iz-section cta">
+  <section class="iz-section cta" aria-labelledby="cta-title">
     <div class="iz-wrap">
-      <div class="cta__panel">
-        <img class="cta__bg" src="/cta-mountains.jpg" alt="" aria-hidden="true" >
-        <div class="cta__scrim" aria-hidden="true"/>
+      <div class="cta__panel iz-reveal">
+        <img class="cta__bg" src="/cta-mountains.jpg" alt="" width="1672" height="941" loading="lazy" decoding="async">
+        <div class="cta__scrim" aria-hidden="true" />
 
         <div class="cta__content">
           <div>
             <p class="iz-eyebrow">Secure today. A brighter tomorrow.</p>
-            <h2 class="iz-h2">Privacy is a choice.<br >Make it yours.</h2>
-            <p class="iz-lead">Experience a more open, secure and independent future.</p>
-            <NuxtLink to="/shop" class="iz-btn iz-btn--solid">
-              <span>Shop Now</span>
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M4 12h15m0 0-5.5-5.5M19 12l-5.5 5.5"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+            <h2 id="cta-title" class="iz-h2">Privacy is a choice.<br>Make it yours.</h2>
+            <p class="iz-lead">Find the IZ phone that fits your hand, your battery needs and your storage.</p>
+            <NuxtLink to="/shop" class="iz-btn iz-btn--solid mt-8">
+              <span>Browse the catalog</span>
+              <UiIcon name="arrow" />
             </NuxtLink>
           </div>
 
-          <p class="iz-vertical cta__aside">Same world.<br >Safer phone.</p>
+          <p class="iz-vertical cta__aside" aria-hidden="true">Same world.<br>Safer phone.</p>
         </div>
       </div>
     </div>

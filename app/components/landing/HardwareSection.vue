@@ -1,66 +1,55 @@
 <script setup lang="ts">
-const points = [
-  { title: "Trusted Hardware", text: "Security built in, from the ground up.", icon: "chip" },
-  { title: "Optimized OS", text: "Minimal attack surface, maximum efficiency.", icon: "layers" },
-  { title: "Open Future", text: "Freedom to choose. Built to last.", icon: "infinity" },
-] as const;
+import type { FeatureIcon } from "~/data/os";
+
+const points: { title: string; text: string; icon: FeatureIcon }[] = [
+  {
+    title: "Dedicated secure element",
+    text: "Keys and biometric data are handled by a separate chip, not the main processor.",
+    icon: "chip",
+  },
+  {
+    title: "Hardware controls on selected models",
+    text: "IZ Air adds a camera and microphone cut-off and a USB-C data-blocking mode.",
+    icon: "sliders",
+  },
+  {
+    title: "A wallet edition",
+    text: "IZ Vault adds offline transaction signing and Shamir backup for recovery phrases.",
+    icon: "key",
+  },
+];
 </script>
 
 <template>
-  <section id="hardware" class="iz-section iz-section--tint">
+  <section id="hardware" class="iz-section iz-section--tint" aria-labelledby="hardware-title">
     <div class="iz-wrap hardware__grid">
-      <div class="hardware__intro">
-        <p class="iz-eyebrow">Hardware + Software</p>
-        <h2 class="iz-h2">Stronger<br >Together</h2>
+      <div class="hardware__intro iz-reveal">
+        <p class="iz-eyebrow">Hardware + software</p>
+        <h2 id="hardware-title" class="iz-h2">Designed<br>together</h2>
         <p class="iz-lead">
-          Custom hardware and a hardened operating system work as one to deliver end-to-end protection, from
-          silicon to software.
+          IZ devices and IZ OS are built as one system, so protections reach from the chip that stores your keys to
+          the permissions you grant each app.
         </p>
-        <NuxtLink to="/offer" class="iz-btn iz-btn--ghost">
-          <span>Learn More</span>
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M4 12h15m0 0-5.5-5.5M19 12l-5.5 5.5"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+        <NuxtLink to="/shop" class="iz-btn iz-btn--ghost mt-8">
+          <span>Compare devices</span>
+          <UiIcon name="arrow" />
         </NuxtLink>
       </div>
 
-      <div class="hardware__visual">
-        <img src="/iz-chip.png" alt="IZ secure element surrounded by circuitry" >
+      <div class="hardware__visual iz-reveal">
+        <img
+          src="/iz-chip.png"
+          alt="IZ secure element surrounded by circuitry"
+          width="900"
+          height="981"
+          loading="lazy"
+          decoding="async"
+        >
       </div>
 
       <ul class="hardware__points">
-        <li v-for="point in points" :key="point.title" class="hardware__point">
-          <span class="hardware__icon">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <template v-if="point.icon === 'chip'">
-                <rect x="7" y="7" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.6" />
-                <path
-                  d="M10 7V4m4 3V4m-4 16v-3m4 3v-3M7 10H4m3 4H4m16-4h-3m3 4h-3"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </template>
-              <template v-else-if="point.icon === 'layers'">
-                <path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-                <path d="m4 12 8 4.5 8-4.5M4 16.5 12 21l8-4.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-              </template>
-              <template v-else>
-                <path
-                  d="M7.5 9.5c1.9 0 2.6 2.5 4.5 2.5s2.6-2.5 4.5-2.5a2.5 2.5 0 0 1 0 5c-1.9 0-2.6-2.5-4.5-2.5S13.9 14.5 12 14.5 9.4 12 7.5 12a2.5 2.5 0 0 0 0 5"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </template>
-            </svg>
-          </span>
+        <li v-for="point in points" :key="point.title" class="hardware__point iz-reveal">
+          <span class="hardware__icon"><UiIcon :name="point.icon" /></span>
           <div>
             <h3 class="hardware__title">{{ point.title }}</h3>
             <p class="hardware__text">{{ point.text }}</p>

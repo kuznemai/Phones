@@ -1,4 +1,4 @@
-import type { Currency, OrderStatus, PaymentStatus } from "#shared/types";
+import type { Currency } from "#shared/types";
 
 const LOCALE = "en-GB";
 
@@ -15,60 +15,16 @@ export function formatPrice(cents: number | null | undefined, currency: Currency
   }).format(value);
 }
 
-export function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short", year: "numeric" }).format(date);
-}
-
-export function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(LOCALE, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
-
 export function formatEta(minDays: number, maxDays: number): string {
-  return minDays === maxDays ? `${minDays} days` : `${minDays}–${maxDays} days`;
+  if (minDays === maxDays) return `${minDays} ${minDays === 1 ? "day" : "days"}`;
+  return `${minDays}–${maxDays} days`;
 }
 
-export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  created: "Created",
-  awaiting_payment: "Awaiting payment",
-  paid: "Paid",
-  processing: "Processing",
-  shipped: "Shipped",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
+/** "6.7″ display · 5000 mAh" style summaries on cards. */
+export function formatInches(value: number): string {
+  return `${value}″`;
+}
 
-/** Badge classes per status — one place so they never drift between screens. */
-export const ORDER_STATUS_TONES: Record<OrderStatus, string> = {
-  created: "bg-white/5 text-zinc-300 border-white/10",
-  awaiting_payment: "bg-amber-500/10 text-amber-300 border-amber-500/30",
-  paid: "bg-sky-500/10 text-sky-300 border-sky-500/30",
-  processing: "bg-indigo-500/10 text-indigo-300 border-indigo-500/30",
-  shipped: "bg-blue-500/10 text-blue-300 border-blue-500/30",
-  delivered: "bg-emerald-500/10 text-emerald-300 border-emerald-500/30",
-  cancelled: "bg-red-500/10 text-red-300 border-red-500/30",
-};
-
-export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
-  pending: "Pending",
-  paid: "Paid",
-  failed: "Failed",
-  cancelled: "Cancelled",
-};
-
-export const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  card: "Card",
-  crypto: "Crypto",
-  on_delivery: "On delivery",
-};
+export function formatStorage(gb: number): string {
+  return gb >= 1024 ? `${gb / 1024} TB` : `${gb} GB`;
+}

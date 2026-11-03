@@ -1,92 +1,184 @@
 <script setup lang="ts">
+import { sendSupportMessage } from "~/services/support";
 import { isFilled, isValidEmail } from "~/utils/validation";
 
-const SUPPORT_EMAIL = "support@iz.example";
+const TOPICS = ["Choosing a device", "IZ OS and security", "Orders and delivery", "Something else"];
+const MESSAGE_MAX_LENGTH = 2000;
 
-const form = reactive({ name: "", email: "", message: "" });
-const errors = ref<Record<string, string>>({});
-const opened = ref(false);
+// Kept in memory only: nothing here is stored or sent.
+const form = reactive({ name: "", email: "", topic: TOPICS[0]!, message: "" });
+const errors = ref<Partial<Record<"name" | "email" | "message", string>>>({});
+const result = ref<string | null>(null);
+const resultRef = ref<HTMLElement | null>(null);
 
-/**
- * No contact endpoint exists yet, so the form hands the message to the visitor's
- * mail client. It becomes a `POST /support/messages` call once the backend is up.
- */
-function submit(): void {
-  errors.value = {};
-
-  if (!isFilled(form.name, 2)) errors.value.name = "Enter your name";
-  if (!isValidEmail(form.email)) errors.value.email = "Enter a valid email address";
-  if (!isFilled(form.message, 10)) errors.value.message = "Tell us a little more (at least 10 characters)";
-  if (Object.keys(errors.value).length > 0) return;
-
-  const subject = encodeURIComponent(`IZ — message from ${form.name}`);
-  const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`);
-  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
-  opened.value = true;
+function validate(): boolean {
+  const next: typeof errors.value = {};
+  if (!isFilled(form.name, 2)) next.name = "Enter your name.";
+  if (!isFilled(form.email)) next.email = "Enter your email address.";
+  else if (!isValidEmail(form.email)) next.email = "Enter a valid email address, for example name@example.com.";
+  if (!isFilled(form.message, 10)) next.message = "Write at least 10 characters so we know how to help.";
+  errors.value = next;
+  return Object.keys(next).length === 0;
 }
 
+async function submit(): Promise<void> {
+  result.value = null;
+  if (!validate()) {
+    const first = Object.keys(errors.value)[0];
+    if (first) document.getElementById(`contact-${first}`)?.focus();
+    return;
+  }
+  const response = await sendSupportMessage({ ...form });
+  result.value = response.status === "unavailable" ? response.message : "Thanks, your message was sent.";
+  await nextTick();
+  resultRef.value?.focus();
+}
+
+watch(
+  () => ({ ...form }),
+  () => {
+    result.value = null;
+  },
+);
+
 useSeo({
-  title: "Support",
-  description: "Questions about devices, orders or partnerships — talk to the IZ team.",
+  title: "Contact",
+  description: "How to reach the IZ Secure team. Contact channels will be published before sales open.",
 });
 </script>
 
 <template>
   <div class="iz-wrap iz-wrap--narrow iz-page">
-    <header class="mb-10 max-w-2xl">
-      <p class="iz-eyebrow">Get in touch</p>
-      <h1 class="iz-h1 mt-3">Support</h1>
-      <p class="mt-4 text-sm leading-relaxed text-[var(--iz-muted)] md:text-base">
-        Questions about devices, orders, or partnerships — send us a message and we will get back to you
-        within one business day.
-      </p>
-    </header>
+    <UiPageHeader
+      eyebrow="Contact"
+      title="Get in touch"
+      lead="Official contact channels have not been published yet. They will appear on this page before sales open."
+    />
 
-    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
-      <form class="iz-card flex flex-col gap-4" novalidate @submit.prevent="submit">
-        <UiFormField id="contact-name" v-model="form.name" label="Name" autocomplete="name" :error="errors.name" required />
-        <UiFormField
-          id="contact-email"
-          v-model="form.email"
-          label="Email"
-          type="email"
-          inputmode="email"
-          autocomplete="email"
-          :error="errors.email"
-          required
-        />
+    <div class="contact">
+      <section class="iz-card" aria-labelledby="form-heading">
+        <h2 id="form-heading" class="contact__title">Message form preview</h2>
+        <UiNotice class="mt-4">
+          The message service is not connected yet. You can try the form, but messages are not sent or saved.
+        </UiNotice>
 
-        <div>
-          <label class="iz-label" for="contact-message">Message</label>
-          <textarea
+        <form class="contact__form" novalidate @submit.prevent="submit">
+          <UiFormField
+            id="contact-name"
+            v-model="form.name"
+            label="Name"
+            autocomplete="name"
+            :maxlength="100"
+            :error="errors.name"
+            required
+          />
+          <UiFormField
+            id="contact-email"
+            v-model="form.email"
+            label="Email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            :maxlength="120"
+            :error="errors.email"
+            required
+          />
+          <div>
+            <label class="iz-label" for="contact-topic">Topic</label>
+            <select id="contact-topic" v-model="form.topic" class="iz-input">
+              <option v-for="topic in TOPICS" :key="topic" :value="topic">{{ topic }}</option>
+            </select>
+          </div>
+          <UiFormField
             id="contact-message"
             v-model="form.message"
-            class="iz-input min-h-32"
-            rows="5"
-            :aria-invalid="errors.message ? 'true' : undefined"
-            :aria-describedby="errors.message ? 'contact-message-error' : undefined"
-            placeholder="How can we help?"
+            label="Message"
+            multiline
+            :maxlength="MESSAGE_MAX_LENGTH"
+            :error="errors.message"
+            required
           />
-          <p v-if="errors.message" id="contact-message-error" class="iz-error">{{ errors.message }}</p>
+
+          <button type="submit" class="iz-btn iz-btn--solid self-start">Send message (demo)</button>
+
+          <div v-if="result" ref="resultRef" class="contact__result" role="status" tabindex="-1">
+            <UiIcon name="info" />
+            <p>{{ result }}</p>
+          </div>
+        </form>
+      </section>
+
+      <aside class="contact__aside" aria-label="Other help">
+        <div class="iz-card">
+          <h2 class="contact__title">Find an answer now</h2>
+          <ul class="contact__links">
+            <li>
+              <NuxtLink to="/faq" class="iz-link">Frequently asked questions</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/security" class="iz-link">How IZ OS protects you</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/shop" class="iz-link">Compare devices in the catalog</NuxtLink>
+            </li>
+          </ul>
         </div>
-
-        <button type="submit" class="iz-btn iz-btn--solid mt-2 self-start">Send message</button>
-
-        <p v-if="opened" class="text-sm text-emerald-300" role="status">
-          We opened your mail app with the message ready to send.
-        </p>
-      </form>
-
-      <aside class="iz-card">
-        <h2 class="iz-label">Direct</h2>
-        <a :href="`mailto:${SUPPORT_EMAIL}`" class="mt-2 block text-sm text-[var(--iz-accent)] hover:underline">
-          {{ SUPPORT_EMAIL }}
-        </a>
-        <p class="mt-6 text-xs leading-relaxed text-[var(--iz-muted)]">
-          Order questions are answered fastest with the order number from
-          <NuxtLink to="/profile/orders" class="text-[var(--iz-accent)] hover:underline">My orders</NuxtLink>.
-        </p>
       </aside>
     </div>
   </div>
 </template>
+
+<style scoped>
+.contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.contact__title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.contact__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+
+.contact__result {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgb(143 192 238 / 0.4);
+  border-radius: 0.9rem;
+  background: rgb(143 192 238 / 0.07);
+  color: #d6e6f6;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.contact__result svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--iz-accent);
+}
+
+.contact__links {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 860px) {
+  .contact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+</style>

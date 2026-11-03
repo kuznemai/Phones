@@ -1,28 +1,65 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { NAV_LINKS, SITE } from "~/data/site";
 import { useCartStore } from "~/stores/cart";
 import { useFavoritesStore } from "~/stores/favorites";
 
 withDefaults(defineProps<{ overlay?: boolean }>(), { overlay: false });
 
-const auth = useAuthStore();
 const cart = useCartStore();
 const favorites = useFavoritesStore();
 const route = useRoute();
 
 const isMenuOpen = ref(false);
+const drawer = ref<HTMLElement | null>(null);
+const burger = ref<HTMLButtonElement | null>(null);
+const closeButton = ref<HTMLButtonElement | null>(null);
 
-const NAV = [
-  { label: "Home", to: "/" },
-  { label: "Devices", to: "/shop" },
-  { label: "Technology", to: "/offer" },
-  { label: "Support", to: "/contact" },
-];
+const cartLabel = computed(() =>
+  cart.count > 0 ? `Cart, ${cart.count} ${cart.count === 1 ? "item" : "items"}` : "Cart, empty",
+);
+const savedLabel = computed(() => (favorites.count > 0 ? `Saved devices, ${favorites.count}` : "Saved devices"));
 
-// Close the drawer on navigation instead of watching the router inside the template.
-watch(() => route.fullPath, () => {
+function isActive(to: string): boolean {
+  return route.path === to || route.path.startsWith(`${to}/`) || (to === "/shop" && route.path.startsWith("/product/"));
+}
+
+function openMenu(): void {
+  isMenuOpen.value = true;
+  nextTick(() => closeButton.value?.focus());
+}
+
+function closeMenu(restoreFocus = true): void {
+  if (!isMenuOpen.value) return;
   isMenuOpen.value = false;
-});
+  if (restoreFocus) nextTick(() => burger.value?.focus());
+}
+
+/** Keeps Tab inside the open drawer and lets Escape close it. */
+function onDrawerKeydown(event: KeyboardEvent): void {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeMenu();
+    return;
+  }
+  if (event.key !== "Tab" || !drawer.value) return;
+  const focusable = [...drawer.value.querySelectorAll<HTMLElement>("a[href], button:not([disabled])")];
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (!first || !last) return;
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+// Close the drawer on navigation; focus moves to the new page instead.
+watch(
+  () => route.fullPath,
+  () => closeMenu(false),
+);
 
 // A fixed full-screen drawer must not leave the page scrollable behind it.
 watch(isMenuOpen, (open) => {
@@ -32,28 +69,30 @@ watch(isMenuOpen, (open) => {
 onBeforeUnmount(() => {
   if (import.meta.client) document.body.style.overflow = "";
 });
-
-async function signOut(): Promise<void> {
-  await auth.logout();
-  isMenuOpen.value = false;
-  await navigateTo("/");
-}
 </script>
 
 <template>
   <header class="site-header" :class="overlay ? 'site-header--overlay' : 'site-header--solid'">
     <div class="site-header__row iz-wrap">
-      <NuxtLink to="/" class="brand" aria-label="IZ Secure — home">
-        <img class="brand__mark" src="/iz-mark-white.png" alt="" width="60" height="43" >
-        <span class="brand__tag">Secure<br >Tomorrow</span>
+      <NuxtLink to="/" class="brand" :aria-label="`${SITE.name} — home`">
+        <img class="brand__mark" src="/iz-mark-white.png" alt="" width="60" height="43">
+        <span class="brand__tag" aria-hidden="true">Secure<br>Tomorrow</span>
       </NuxtLink>
 
       <nav class="site-nav" aria-label="Main">
-        <NuxtLink v-for="link in NAV" :key="link.to" :to="link.to">{{ link.label }}</NuxtLink>
+        <NuxtLink
+          v-for="link in NAV_LINKS"
+          :key="link.to"
+          :to="link.to"
+          :class="{ 'is-active': isActive(link.to) }"
+          :aria-current="isActive(link.to) ? 'page' : undefined"
+        >
+          {{ link.label }}
+        </NuxtLink>
       </nav>
 
       <div class="site-actions">
-        <NuxtLink to="/favorites" class="icon-btn" aria-label="Saved devices">
+        <NuxtLink to="/favorites" class="icon-btn" :aria-label="savedLabel">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="M12 20s-7.5-4.6-7.5-9.4A4.1 4.1 0 0 1 12 8.2a4.1 4.1 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20Z"
@@ -63,11 +102,11 @@ async function signOut(): Promise<void> {
             />
           </svg>
           <ClientOnly>
-            <span v-if="favorites.count > 0" class="icon-btn__badge">{{ favorites.count }}</span>
+            <span v-if="favorites.count > 0" class="icon-btn__badge" aria-hidden="true">{{ favorites.count }}</span>
           </ClientOnly>
         </NuxtLink>
 
-        <NuxtLink to="/cart" class="icon-btn" aria-label="Cart">
+        <NuxtLink to="/cart" class="icon-btn" :aria-label="cartLabel" data-testid="header-cart">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="M5.6 8h12.8l1 11.2a1.6 1.6 0 0 1-1.6 1.8H6.2a1.6 1.6 0 0 1-1.6-1.8L5.6 8Z"
@@ -78,69 +117,70 @@ async function signOut(): Promise<void> {
             <path d="M8.8 8V6.4a3.2 3.2 0 0 1 6.4 0V8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
           </svg>
           <ClientOnly>
-            <span v-if="cart.count > 0" class="icon-btn__badge">{{ cart.count }}</span>
+            <span v-if="cart.count > 0" class="icon-btn__badge" aria-hidden="true" data-testid="cart-count">
+              {{ cart.count }}
+            </span>
           </ClientOnly>
         </NuxtLink>
 
-        <NuxtLink
-          :to="auth.isAuthenticated ? '/profile' : '/login'"
-          class="icon-btn"
-          :aria-label="auth.isAuthenticated ? 'Profile' : 'Sign in'"
+        <button
+          ref="burger"
+          type="button"
+          class="icon-btn burger"
+          :aria-expanded="isMenuOpen"
+          aria-controls="mobile-menu"
+          aria-label="Open menu"
+          @click="openMenu"
         >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="8.5" r="3.6" stroke="currentColor" stroke-width="1.7" />
-            <path d="M4.8 20a7.2 7.2 0 0 1 14.4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
-          </svg>
-        </NuxtLink>
-
-        <NuxtLink to="/shop" class="header-cta">Shop Now</NuxtLink>
-      </div>
-
-      <button
-        type="button"
-        class="burger"
-        :aria-expanded="isMenuOpen"
-        aria-controls="mobile-menu"
-        aria-label="Open menu"
-        @click="isMenuOpen = true"
-      >
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-        </svg>
-      </button>
-    </div>
-
-    <div v-if="isMenuOpen" id="mobile-menu" class="drawer" role="dialog" aria-modal="true" aria-label="Menu">
-      <div class="drawer__head iz-wrap">
-        <NuxtLink to="/" class="brand">
-          <img class="brand__mark" src="/iz-mark-white.png" alt="" width="60" height="43" >
-          <span class="brand__tag">Secure<br >Tomorrow</span>
-        </NuxtLink>
-        <button type="button" class="icon-btn" aria-label="Close menu" @click="isMenuOpen = false">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
           </svg>
         </button>
       </div>
-
-      <nav class="drawer__nav iz-wrap" aria-label="Mobile">
-        <NuxtLink v-for="link in NAV" :key="link.to" :to="link.to">{{ link.label }}</NuxtLink>
-        <NuxtLink to="/favorites">Saved devices</NuxtLink>
-        <NuxtLink to="/cart">Cart <span v-if="cart.count > 0">({{ cart.count }})</span></NuxtLink>
-
-        <template v-if="auth.isAuthenticated">
-          <NuxtLink to="/profile">Profile</NuxtLink>
-          <NuxtLink to="/profile/orders">My orders</NuxtLink>
-          <button type="button" class="drawer__signout" @click="signOut">Log out</button>
-        </template>
-        <template v-else>
-          <NuxtLink to="/login">Sign in</NuxtLink>
-          <NuxtLink to="/register">Create account</NuxtLink>
-        </template>
-
-        <NuxtLink to="/shop" class="iz-btn iz-btn--solid mt-4 self-start">Shop Now</NuxtLink>
-      </nav>
     </div>
+
+    <Transition name="drawer">
+      <div
+        v-if="isMenuOpen"
+        id="mobile-menu"
+        ref="drawer"
+        class="drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+        @keydown="onDrawerKeydown"
+      >
+        <div class="drawer__head iz-wrap">
+          <NuxtLink to="/" class="brand" :aria-label="`${SITE.name} — home`">
+            <img class="brand__mark" src="/iz-mark-white.png" alt="" width="60" height="43">
+            <span class="brand__tag" aria-hidden="true">Secure<br>Tomorrow</span>
+          </NuxtLink>
+          <button ref="closeButton" type="button" class="icon-btn" aria-label="Close menu" @click="closeMenu()">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        <nav class="drawer__nav iz-wrap" aria-label="Mobile">
+          <NuxtLink to="/" :aria-current="route.path === '/' ? 'page' : undefined">Home</NuxtLink>
+          <NuxtLink
+            v-for="link in NAV_LINKS"
+            :key="link.to"
+            :to="link.to"
+            :aria-current="isActive(link.to) ? 'page' : undefined"
+          >
+            {{ link.label }}
+          </NuxtLink>
+          <NuxtLink to="/favorites">
+            Saved devices <span v-if="favorites.count > 0" class="drawer__count">{{ favorites.count }}</span>
+          </NuxtLink>
+          <NuxtLink to="/cart">
+            Cart <span v-if="cart.count > 0" class="drawer__count">{{ cart.count }}</span>
+          </NuxtLink>
+        </nav>
+      </div>
+    </Transition>
   </header>
 </template>
 
@@ -155,7 +195,7 @@ async function signOut(): Promise<void> {
   right: 0;
   left: 0;
   z-index: 100;
-  background: transparent;
+  background: linear-gradient(180deg, rgb(5 7 13 / 0.7), rgb(5 7 13 / 0));
 }
 
 .site-header--solid {
@@ -172,7 +212,7 @@ async function signOut(): Promise<void> {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding-block: clamp(0.85rem, 1.6vw, 1.5rem);
+  padding-block: clamp(0.75rem, 1.4vw, 1.25rem);
 }
 
 /* ---------------------------------------------------------------- brand */
@@ -184,13 +224,13 @@ async function signOut(): Promise<void> {
 }
 
 .brand__mark {
-  height: clamp(1.6rem, 2.6vw, 2.4rem);
+  height: clamp(1.6rem, 2.4vw, 2.2rem);
   width: auto;
 }
 
 .brand__tag {
   color: #cfe0f2;
-  font-size: clamp(0.55rem, 0.75vw, 0.7rem);
+  font-size: clamp(0.55rem, 0.75vw, 0.68rem);
   line-height: 1.7;
   letter-spacing: 0.26em;
   text-transform: uppercase;
@@ -201,27 +241,46 @@ async function signOut(): Promise<void> {
 .site-nav {
   display: none;
   align-items: center;
-  gap: clamp(1.25rem, 2.6vw, 2.75rem);
+  gap: clamp(1.1rem, 2.2vw, 2.4rem);
 }
 
 .site-nav a {
-  color: #e7eef6;
-  font-size: clamp(0.86rem, 1.1vw, 1rem);
+  position: relative;
+  padding-block: 0.5rem;
+  color: #dfe8f2;
+  font-size: clamp(0.86rem, 1vw, 0.95rem);
   white-space: nowrap;
   transition: color 0.2s ease;
 }
 
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0.15rem;
+  left: 0;
+  height: 1px;
+  background: var(--iz-accent);
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+}
+
 .site-nav a:hover,
-.site-nav a.router-link-exact-active {
-  color: var(--iz-accent);
+.site-nav a.is-active {
+  color: #fff;
+}
+
+.site-nav a.is-active::after,
+.site-nav a:hover::after {
+  transform: scaleX(1);
 }
 
 /* -------------------------------------------------------------- actions */
 .site-actions {
-  display: none;
+  display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: clamp(0.35rem, 0.8vw, 0.7rem);
+  gap: clamp(0.15rem, 0.6vw, 0.5rem);
 }
 
 .icon-btn {
@@ -244,65 +303,26 @@ async function signOut(): Promise<void> {
 }
 
 .icon-btn svg {
-  width: 1.45rem;
-  height: 1.45rem;
+  width: 1.4rem;
+  height: 1.4rem;
 }
 
 .icon-btn__badge {
   position: absolute;
-  top: 0.35rem;
-  right: 0.2rem;
-  min-width: 1.05rem;
-  padding: 0 0.25rem;
+  top: 0.3rem;
+  right: 0.15rem;
+  min-width: 1.1rem;
+  padding: 0 0.28rem;
   border-radius: 999px;
   background: var(--iz-accent-strong);
   color: #04070f;
-  font-size: 0.65rem;
+  font-size: 0.66rem;
   font-weight: 600;
-  line-height: 1.05rem;
+  line-height: 1.1rem;
   text-align: center;
 }
 
-.header-cta {
-  display: inline-flex;
-  min-height: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  margin-left: clamp(0.3rem, 0.8vw, 0.9rem);
-  padding: 0.7rem 1.6rem;
-  border-radius: 999px;
-  background: #fff;
-  color: #05080f;
-  font-size: clamp(0.86rem, 1.05vw, 0.98rem);
-  font-weight: 500;
-  white-space: nowrap;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.header-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 28px rgb(120 180 255 / 0.3);
-}
-
 /* --------------------------------------------------------------- drawer */
-.burger {
-  display: inline-flex;
-  height: 2.75rem;
-  width: 2.75rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  color: #fff;
-}
-
-.burger svg {
-  width: 1.6rem;
-  height: 1.6rem;
-}
-
 .drawer {
   position: fixed;
   inset: 0;
@@ -317,39 +337,58 @@ async function signOut(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-block: 1rem;
+  padding-block: 0.75rem;
   border-bottom: 1px solid var(--iz-border-soft);
 }
 
 .drawer__nav {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding-block: 1.5rem 3rem;
+  padding-block: 1rem 3rem;
 }
 
-.drawer__nav a,
-.drawer__signout {
-  padding-block: 0.9rem;
+.drawer__nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-block: 0.95rem;
   border-bottom: 1px solid var(--iz-border-soft);
   color: #e7eef6;
-  font-size: 1.05rem;
-  text-align: left;
+  font-size: 1.1rem;
 }
 
 .drawer__nav a:hover,
-.drawer__signout:hover {
+.drawer__nav a[aria-current="page"] {
   color: var(--iz-accent);
 }
 
-.drawer__nav a.iz-btn {
-  border-bottom: 0;
-  color: #05080f;
+.drawer__count {
+  min-width: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--iz-accent-strong);
+  color: #04070f;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4rem;
+  text-align: center;
+}
+
+.drawer-enter-active,
+.drawer-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.drawer-enter-from,
+.drawer-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 @media (min-width: 1024px) {
-  .site-nav,
-  .site-actions {
+  .site-nav {
     display: flex;
   }
 

@@ -1,110 +1,55 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const FEATURES = [
+  { icon: "boot", title: "Verified boot", text: "Checked at every start-up." },
+  { icon: "lock", title: "Encrypted storage", text: "On by default." },
+  { icon: "sliders", title: "Per-app permissions", text: "Network and sensors." },
+  { icon: "refresh", title: "5 years of updates", text: "Signed, over the air." },
+] as const;
+</script>
 
 <template>
-  <section class="hero">
-    <div class="hero__bg" aria-hidden="true"/>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__bg" aria-hidden="true" />
 
     <div class="hero__stage">
       <div class="hero__visual">
-        <img src="/hero-phone.png" alt="IZ secure smartphone on a glowing shield podium" >
+        <img
+          src="/hero-phone.png"
+          alt="IZ smartphone standing on a glowing shield-shaped podium"
+          width="1000"
+          height="931"
+          fetchpriority="high"
+          decoding="async"
+        >
       </div>
 
       <div class="hero__copy">
-        <p class="hero__eyebrow">Built to protect<br >what matters</p>
-        <h1 class="hero__title">Next-Gen<br >Security<br >in Your Hands</h1>
-        <p class="hero__sub">A secure operating system.<br >A more open future.</p>
+        <p class="hero__eyebrow">Smartphones with IZ OS</p>
+        <h1 id="hero-title" class="hero__title">Privacy built in,<br>not bolted on</h1>
+        <p class="hero__sub">
+          Every IZ phone runs IZ OS: verified boot, storage encrypted by default and per-app network control. No
+          vendor account required.
+        </p>
         <div class="hero__actions">
           <NuxtLink to="/shop" class="iz-btn iz-btn--solid">
-            <span>Shop Now</span>
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 12h15m0 0-5.5-5.5M19 12l-5.5 5.5"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
+            <span>Browse the catalog</span>
+            <UiIcon name="arrow" />
           </NuxtLink>
-          <NuxtLink to="/offer" class="iz-btn iz-btn--ghost">
-            <span>Learn More</span>
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 12h15m0 0-5.5-5.5M19 12l-5.5 5.5"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
+          <NuxtLink to="/security" class="iz-btn iz-btn--ghost">
+            <span>How IZ OS protects you</span>
           </NuxtLink>
         </div>
       </div>
 
-      <p class="hero__aside">Privacy<br >goes<br >further.</p>
+      <p class="hero__aside" aria-hidden="true">Privacy<br>goes<br>further.</p>
     </div>
 
-    <ul class="hero__features">
-      <li class="hero__feature">
-        <svg class="hero__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <rect x="9" y="21" width="30" height="21" rx="4" stroke="currentColor" stroke-width="3" />
-          <path d="M16 21v-6a8 8 0 0 1 16 0v6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-          <circle cx="24" cy="29.5" r="2.6" fill="currentColor" />
-          <path d="M24 31.5v4" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-        </svg>
+    <ul class="hero__features" aria-label="Included on every model">
+      <li v-for="feature in FEATURES" :key="feature.title" class="hero__feature">
+        <UiIcon :name="feature.icon" class="hero__icon" />
         <div>
-          <h3>Unbreakable Privacy</h3>
-          <p>Your data stays yours.</p>
-        </div>
-      </li>
-
-      <li class="hero__feature">
-        <svg class="hero__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <rect x="13" y="13" width="22" height="22" rx="3" stroke="currentColor" stroke-width="3" />
-          <rect x="20" y="20" width="8" height="8" rx="1.5" fill="currentColor" />
-          <path
-            d="M19 13V8m10 5V8M19 40v-5m10 5v-5M13 19H8m5 10H8m32-10h-5m5 10h-5"
-            stroke="currentColor"
-            stroke-width="3"
-            stroke-linecap="round"
-          />
-        </svg>
-        <div>
-          <h3>Secure by Design</h3>
-          <p>Hardware meets software.</p>
-        </div>
-      </li>
-
-      <li class="hero__feature">
-        <svg class="hero__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <rect x="14" y="10" width="20" height="32" rx="4" stroke="currentColor" stroke-width="3" />
-          <path
-            d="M20 10V7.5a1.5 1.5 0 0 1 1.5-1.5h5A1.5 1.5 0 0 1 28 7.5V10"
-            stroke="currentColor"
-            stroke-width="3"
-            stroke-linecap="round"
-          />
-          <path d="m25.5 17-6 10h5l-2 8 9-11h-5.5l2-7z" fill="currentColor" />
-        </svg>
-        <div>
-          <h3>All-Day Power</h3>
-          <p>Security that lasts.</p>
-        </div>
-      </li>
-
-      <li class="hero__feature">
-        <svg class="hero__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <path
-            d="M24 6 40 14.5v19L24 42 8 33.5v-19L24 6Z"
-            stroke="currentColor"
-            stroke-width="3"
-            stroke-linejoin="round"
-          />
-          <path d="M8 14.5 24 23l16-8.5M24 23v19" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
-        </svg>
-        <div>
-          <h3>Open Ecosystem</h3>
-          <p>More control, fewer chains.</p>
+          <h2>{{ feature.title }}</h2>
+          <p>{{ feature.text }}</p>
         </div>
       </li>
     </ul>
@@ -177,7 +122,7 @@
 .hero__copy {
   position: relative;
   z-index: 2;
-  max-width: 34rem;
+  max-width: 38rem;
 }
 
 .hero__eyebrow {
@@ -192,16 +137,18 @@
 
 .hero__title {
   color: #fff;
-  font-size: clamp(2.4rem, 4.9vw, 4.5rem);
+  font-size: clamp(2.3rem, 4.4vw, 4.1rem);
   font-weight: 700;
   line-height: 1.07;
   letter-spacing: -0.015em;
 }
 
 .hero__sub {
+  max-width: 32rem;
   margin-top: clamp(1.1rem, 2vw, 1.75rem);
+  margin-bottom: clamp(1.5rem, 2.5vw, 2.25rem);
   color: #cbd7e4;
-  font-size: clamp(1.02rem, 1.55vw, 1.4rem);
+  font-size: clamp(1rem, 1.3vw, 1.18rem);
   font-weight: 300;
   line-height: 1.55;
 }
@@ -256,13 +203,13 @@
 }
 
 .hero__icon {
-  width: clamp(2rem, 2.9vw, 2.7rem);
-  height: clamp(2rem, 2.9vw, 2.7rem);
+  width: clamp(1.9rem, 2.6vw, 2.4rem);
+  height: clamp(1.9rem, 2.6vw, 2.4rem);
   flex-shrink: 0;
   color: #fff;
 }
 
-.hero__feature h3 {
+.hero__feature h2 {
   color: #fff;
   font-size: clamp(0.88rem, 1.2vw, 1.1rem);
   font-weight: 600;
@@ -318,6 +265,10 @@
 
   .hero__actions {
     justify-content: center;
+  }
+
+  .hero__sub {
+    margin-inline: auto;
   }
 
   .hero__features {

@@ -1,8 +1,8 @@
 /**
- * Domain contract shared by the Nuxt app and the mock server.
+ * Domain types shared by the storefront and, later, the real backend.
  *
  * All money is expressed in integer minor units (cents) to avoid floating point
- * drift; the real backend is expected to use the same representation.
+ * drift; the backend is expected to use the same representation.
  */
 
 export type Currency = "USD";
@@ -34,10 +34,15 @@ export interface Product {
   images: string[];
   specs: ProductSpec[];
   variants: ProductVariant[];
+  /** Screen diagonal in inches — drives the size filter and card summary. */
+  displayInches: number;
+  batteryMah: number;
+  /** Shown in the "Popular" block on the home page. */
+  featured?: boolean;
   badge?: string;
 }
 
-/** Catalog list item — same shape, trimmed to what a grid needs. */
+/** Catalog list item — the trimmed shape a product grid needs. */
 export interface ProductListItem {
   id: string;
   slug: string;
@@ -46,12 +51,43 @@ export interface ProductListItem {
   image: string;
   fromPriceCents: number;
   inStock: boolean;
+  displayInches: number;
+  batteryMah: number;
+  storageOptionsGb: number[];
+  colors: { name: string; hex: string }[];
   badge?: string;
+}
+
+export type ProductSort = "featured" | "price-asc" | "price-desc" | "name";
+export type SizeClass = "compact" | "standard" | "large";
+
+export interface ProductQuery {
+  search?: string;
+  sort?: ProductSort;
+  storage?: number[];
+  colors?: string[];
+  sizes?: SizeClass[];
+  inStockOnly?: boolean;
+}
+
+/** The filter part of a query, with every field present (what the filter panel edits). */
+export type CatalogFilters = Required<Pick<ProductQuery, "storage" | "colors" | "sizes" | "inStockOnly">>;
+
+export interface ProductListResult {
+  items: ProductListItem[];
+  total: number;
+}
+
+/** Values the catalog filters can offer, derived from the whole catalog. */
+export interface CatalogFacets {
+  storage: number[];
+  colors: { name: string; hex: string }[];
+  sizes: SizeClass[];
 }
 
 /* ------------------------------------------------------------------- cart */
 
-/** What the client persists. Prices always come back from the server. */
+/** What the browser persists. Prices are always re-derived from the catalog. */
 export interface CartItemInput {
   productId: string;
   variantId: string;
@@ -68,7 +104,7 @@ export interface CartLine {
   unitPriceCents: number;
   quantity: number;
   lineTotalCents: number;
-  /** false when the configuration went out of stock after it was added. */
+  /** false when the configuration is out of stock. */
   available: boolean;
   maxQuantity: number;
 }
@@ -77,7 +113,6 @@ export interface CartTotals {
   currency: Currency;
   subtotalCents: number;
   deliveryCents: number;
-  discountCents: number;
   totalCents: number;
 }
 
@@ -85,6 +120,7 @@ export interface CartPreview {
   lines: CartLine[];
   totals: CartTotals;
   unavailableCount: number;
+  itemCount: number;
 }
 
 /* --------------------------------------------------------------- delivery */
@@ -100,136 +136,27 @@ export interface DeliveryOption {
   etaDaysMax: number;
 }
 
-/* ---------------------------------------------------------------- payment */
-
-export type PaymentMethodId = "card" | "crypto" | "on_delivery";
-export type PaymentStatus = "pending" | "paid" | "failed" | "cancelled";
-
-export interface Payment {
-  id: string;
-  orderId: string;
-  orderNumber: string;
-  methodId: PaymentMethodId;
-  status: PaymentStatus;
-  amountCents: number;
-  currency: Currency;
-  /** Where the shopper is sent to complete the payment (mock provider page). */
-  redirectUrl: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/* ----------------------------------------------------------------- orders */
-
-export type OrderStatus =
-  | "created"
-  | "awaiting_payment"
-  | "paid"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
-
-export interface OrderItem {
-  productId: string;
-  variantId: string;
-  slug: string;
-  title: string;
-  variantLabel: string;
-  image: string;
-  unitPriceCents: number;
-  quantity: number;
-  lineTotalCents: number;
-}
+/* --------------------------------------------------------------- checkout */
 
 export interface ShippingAddress {
   fullName: string;
-  phone: string;
   email: string;
+  phone: string;
   country: string;
   city: string;
   street: string;
   postalCode: string;
-  comment?: string;
+  comment: string;
 }
 
-export interface Order {
-  id: string;
-  number: string;
-  createdAt: string;
-  updatedAt: string;
-  status: OrderStatus;
-  items: OrderItem[];
-  totals: CartTotals;
-  delivery: {
-    methodId: DeliveryMethodId;
-    title: string;
-    priceCents: number;
-    etaDaysMin: number;
-    etaDaysMax: number;
-  };
-  payment: {
-    methodId: PaymentMethodId;
-    status: PaymentStatus;
-    paymentId: string | null;
-  };
+export interface OrderRequest {
+  items: CartItemInput[];
+  deliveryMethodId: DeliveryMethodId;
   address: ShippingAddress;
 }
 
-export interface OrderListItem {
-  id: string;
-  number: string;
-  createdAt: string;
-  status: OrderStatus;
-  totalCents: number;
-  currency: Currency;
-  itemCount: number;
-  previewImages: string[];
-}
-
-/* --------------------------------------------------------------- tracking */
-
-export interface TrackingEvent {
-  status: OrderStatus;
-  title: string;
-  description: string;
-  /** ISO date once the step happened, null while it is still ahead. */
-  at: string | null;
-  done: boolean;
-}
-
-export interface OrderTracking {
-  orderId: string;
-  orderNumber: string;
-  status: OrderStatus;
-  carrier: string | null;
-  trackingNumber: string | null;
-  expectedDeliveryAt: string | null;
-  events: TrackingEvent[];
-}
-
-/* ------------------------------------------------------------------- auth */
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  phone: string | null;
-  createdAt: string;
-}
-
-export interface AuthCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterPayload extends AuthCredentials {
-  name: string;
-}
-
-/* ---------------------------------------------------------------- errors */
-
-/** Shape of a 4xx body: `data.fields` maps a form field to its message. */
-export interface ApiErrorData {
-  fields?: Record<string, string>;
-}
+/**
+ * Result of handing an order to the order service. Until that service exists the
+ * storefront always gets `unavailable` back and never stores what was entered.
+ */
+export type OrderSubmission = { status: "unavailable"; message: string } | { status: "created"; orderId: string };

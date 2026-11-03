@@ -13,6 +13,9 @@ const emit = defineEmits<{ "update:modelValue": [value: number] }>();
 
 const canDecrease = computed(() => props.modelValue > props.min);
 const canIncrease = computed(() => props.modelValue < props.max);
+
+// "Quantity of IZ One" → "quantity of IZ One": lower-case only the first letter.
+const lowerLabel = computed(() => props.label.charAt(0).toLowerCase() + props.label.slice(1));
 </script>
 
 <template>
@@ -21,7 +24,7 @@ const canIncrease = computed(() => props.modelValue < props.max);
       type="button"
       class="stepper__btn"
       :disabled="!canDecrease"
-      :aria-label="`Decrease ${label.toLowerCase()}`"
+      :aria-label="`Decrease ${lowerLabel}`"
       @click="emit('update:modelValue', modelValue - 1)"
     >
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -29,13 +32,13 @@ const canIncrease = computed(() => props.modelValue < props.max);
       </svg>
     </button>
 
-    <output class="stepper__value" :aria-label="`${label}: ${modelValue}`">{{ modelValue }}</output>
+    <output class="stepper__value" aria-live="polite" :aria-label="`${label}: ${modelValue}`">{{ modelValue }}</output>
 
     <button
       type="button"
       class="stepper__btn"
       :disabled="!canIncrease"
-      :aria-label="`Increase ${label.toLowerCase()}`"
+      :aria-label="`Increase ${lowerLabel}`"
       @click="emit('update:modelValue', modelValue + 1)"
     >
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -1,39 +1,20 @@
 <script setup lang="ts">
-import type { DeliveryMethodId, PaymentMethodId, ShippingAddress } from "#shared/types";
-import { fetchDeliveryOptions } from "~/api/catalog";
-import { createOrder } from "~/api/orders";
-import { createPayment } from "~/api/payments";
+import type { DeliveryMethodId, ShippingAddress } from "#shared/types";
 import { useCartPreview } from "~/composables/useCartPreview";
+import { fetchDeliveryOptions } from "~/services/catalog";
+import { submitOrder } from "~/services/orders";
 import { useCartStore } from "~/stores/cart";
-import { useAuthStore } from "~/stores/auth";
-import { formatEta, formatPrice, PAYMENT_METHOD_LABELS } from "~/utils/format";
-import { isFilled, isValidEmail, isValidPhone, normalizePhone } from "~/utils/validation";
-import { toApiFailure } from "~/utils/api-error";
-
-definePageMeta({ middleware: "auth" });
+import { formatEta, formatPrice } from "~/utils/format";
+import type { CheckoutErrors, CheckoutField } from "~/utils/validation";
+import { COMMENT_MAX_LENGTH, validateCheckout, validateCheckoutField } from "~/utils/validation";
 
 const cart = useCartStore();
-const auth = useAuthStore();
 
-const deliveryMethodId = ref<DeliveryMethodId>("standard");
-const paymentMethodId = ref<PaymentMethodId>("card");
-
-const { data: deliveryOptions } = await useAsyncData("delivery-options", fetchDeliveryOptions, {
-  default: () => [],
-});
-
-const { preview, isLoading } = useCartPreview(deliveryMethodId);
-
-const PAYMENT_METHODS: { id: PaymentMethodId; description: string }[] = [
-  { id: "card", description: "You will be redirected to our payment provider." },
-  { id: "crypto", description: "Pay in BTC or a stablecoin via the provider page." },
-  { id: "on_delivery", description: "Pay the courier when the device arrives." },
-];
-
-const form = reactive({
-  fullName: auth.user?.name ?? "",
-  phone: auth.user?.phone ?? "",
-  email: auth.user?.email ?? "",
+// Form state lives in memory only: it is never written to storage or sent anywhere.
+const emptyAddress = (): ShippingAddress => ({
+  fullName: "",
+  email: "",
+  phone: "",
   country: "",
   city: "",
   street: "",
@@ -41,219 +22,418 @@ const form = reactive({
   comment: "",
 });
 
-const errors = ref<Record<string, string>>({});
-const submitError = ref("");
+const form = reactive<ShippingAddress>(emptyAddress());
+const errors = ref<CheckoutErrors>({});
+const touched = ref(new Set<CheckoutField>());
+const submitAttempted = ref(false);
+const result = ref<string | null>(null);
 const isSubmitting = ref(false);
 
-function validate(): boolean {
-  errors.value = {};
+const deliveryMethodId = ref<DeliveryMethodId>("standard");
+const { data: deliveryOptions } = useAsyncData("delivery-options", fetchDeliveryOptions, { default: () => [] });
+const { preview, isLoading } = useCartPreview(deliveryMethodId);
 
-  if (!isFilled(form.fullName, 2)) errors.value.fullName = "Enter the recipient name";
-  if (!isValidPhone(form.phone)) errors.value.phone = "Enter a valid phone number";
-  if (!isValidEmail(form.email)) errors.value.email = "Enter a valid email address";
-  if (!isFilled(form.country)) errors.value.country = "Enter a country";
-  if (!isFilled(form.city)) errors.value.city = "Enter a city";
-  if (!isFilled(form.street, 4)) errors.value.street = "Enter a street and building";
-  if (!isFilled(form.postalCode)) errors.value.postalCode = "Enter a postal code";
+const canCheckout = computed(() => preview.value.itemCount > 0 && preview.value.unavailableCount === 0);
 
-  return Object.keys(errors.value).length === 0;
-}
+const FIELD_LABELS: Record<CheckoutField, string> = {
+  fullName: "Full name",
+  email: "Email",
+  phone: "Phone",
+  country: "Country",
+  city: "City",
+  street: "Street address",
+  postalCode: "Postal code",
+  comment: "Delivery note",
+};
 
-const canSubmit = computed(
-  () => !cart.isEmpty && preview.value.unavailableCount === 0 && !isSubmitting.value,
+const errorList = computed(() =>
+  (Object.keys(FIELD_LABELS) as CheckoutField[])
+    .filter((field) => errors.value[field])
+    .map((field) => ({ field, label: FIELD_LABELS[field], message: errors.value[field]! })),
 );
 
+function fieldId(field: CheckoutField): string {
+  return `checkout-${field}`;
+}
+
+function validateField(field: CheckoutField): void {
+  errors.value = { ...errors.value, [field]: validateCheckoutField(field, form[field]) };
+}
+
+function onBlur(field: CheckoutField): void {
+  touched.value.add(field);
+  validateField(field);
+}
+
+// Once a field has been checked, re-check it as the shopper fixes it.
+watch(
+  () => ({ ...form }),
+  (next, previous) => {
+    result.value = null;
+    for (const field of Object.keys(next) as CheckoutField[]) {
+      if (next[field] !== previous[field] && (touched.value.has(field) || submitAttempted.value)) validateField(field);
+    }
+  },
+);
+
+const summaryRef = ref<HTMLElement | null>(null);
+const resultRef = ref<HTMLElement | null>(null);
+
 async function submit(): Promise<void> {
-  submitError.value = "";
-  if (!validate() || !canSubmit.value) return;
+  submitAttempted.value = true;
+  result.value = null;
+  errors.value = validateCheckout(form);
+
+  if (errorList.value.length > 0) {
+    await nextTick();
+    summaryRef.value?.focus();
+    return;
+  }
 
   isSubmitting.value = true;
   try {
-    const address: ShippingAddress = {
-      fullName: form.fullName.trim(),
-      phone: normalizePhone(form.phone),
-      email: form.email.trim(),
-      country: form.country.trim(),
-      city: form.city.trim(),
-      street: form.street.trim(),
-      postalCode: form.postalCode.trim(),
-      comment: form.comment.trim() || undefined,
-    };
-
-    const order = await createOrder({
-      items: cart.items,
-      deliveryMethodId: deliveryMethodId.value,
-      paymentMethodId: paymentMethodId.value,
-      address,
-    });
-
-    cart.clear();
-
-    if (paymentMethodId.value === "on_delivery") {
-      await navigateTo(`/profile/orders/${order.id}`);
-      return;
-    }
-
-    const payment = await createPayment(order.id);
-    await navigateTo(payment.redirectUrl);
-  } catch (error) {
-    const failure = toApiFailure(error, "We could not place your order. Please try again.");
-    errors.value = { ...errors.value, ...failure.fields };
-    submitError.value = failure.message;
+    const submission = await submitOrder({ items: cart.items, deliveryMethodId: deliveryMethodId.value, address: { ...form } });
+    // A connected order service would return `created`; today it is always unavailable.
+    result.value =
+      submission.status === "unavailable" ? submission.message : "Your order was received by the order service.";
   } finally {
     isSubmitting.value = false;
   }
+  await nextTick();
+  resultRef.value?.focus();
 }
 
-useSeo({ title: "Checkout", description: "Delivery details and payment for your IZ order." });
+function resetForm(): void {
+  Object.assign(form, emptyAddress());
+  errors.value = {};
+  touched.value = new Set();
+  submitAttempted.value = false;
+  result.value = null;
+}
+
+function focusField(field: CheckoutField): void {
+  document.getElementById(fieldId(field))?.focus();
+}
+
+useSeo({
+  title: "Checkout preview",
+  description: "A preview of the IZ Secure checkout. Ordering opens once the order service is connected.",
+});
+
+useHead({ meta: [{ name: "robots", content: "noindex" }] });
 </script>
 
 <template>
   <div class="iz-wrap iz-wrap--narrow iz-page">
-    <header class="mb-8">
-      <p class="iz-eyebrow">Checkout</p>
-      <h1 class="iz-h1 mt-3">Delivery and payment</h1>
-    </header>
+    <UiPageHeader eyebrow="Checkout" title="Checkout preview" />
+
+    <UiNotice class="mb-8" data-testid="demo-notice">
+      <p><strong class="font-medium text-white">This is a demo checkout.</strong> Ordering is not available yet; it will open once the order service is connected.</p>
+      <p class="mt-1">
+        You can fill in and check the form, but nothing you enter is sent or saved, and no order or payment is created.
+      </p>
+    </UiNotice>
 
     <ClientOnly>
       <template #fallback>
-        <div class="iz-shimmer h-40 rounded-2xl" aria-hidden="true" />
+        <div class="iz-shimmer h-60 rounded-2xl" aria-hidden="true" />
       </template>
 
       <UiStateBlock
         v-if="cart.isEmpty"
         title="Your cart is empty"
-        description="Add a device before checking out."
+        description="Add a device to your cart before opening the checkout preview."
       >
-        <NuxtLink to="/shop" class="iz-btn iz-btn--solid">Browse devices</NuxtLink>
+        <NuxtLink to="/shop" class="iz-btn iz-btn--solid">Browse the catalog</NuxtLink>
       </UiStateBlock>
 
-      <form v-else class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start" novalidate @submit.prevent="submit">
-        <div class="flex flex-col gap-8">
-          <section class="iz-card">
-            <h2 class="iz-label">Recipient</h2>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
-              <UiFormField id="co-name" v-model="form.fullName" label="Full name" autocomplete="name" :error="errors.fullName" required />
-              <UiFormField id="co-phone" v-model="form.phone" label="Phone" type="tel" inputmode="tel" autocomplete="tel" :error="errors.phone" required />
-              <UiFormField id="co-email" v-model="form.email" label="Email" type="email" inputmode="email" autocomplete="email" :error="errors.email" required class="sm:col-span-2" />
-            </div>
-          </section>
+      <div v-else class="checkout">
+        <form class="checkout__form" novalidate aria-labelledby="form-title" @submit.prevent="submit">
+          <h2 id="form-title" class="sr-only">Contact and delivery details</h2>
 
-          <section class="iz-card">
-            <h2 class="iz-label">Address</h2>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
-              <UiFormField id="co-country" v-model="form.country" label="Country" autocomplete="country-name" :error="errors.country" required />
-              <UiFormField id="co-city" v-model="form.city" label="City" autocomplete="address-level2" :error="errors.city" required />
-              <UiFormField id="co-street" v-model="form.street" label="Street and building" autocomplete="street-address" :error="errors.street" required class="sm:col-span-2" />
-              <UiFormField id="co-postal" v-model="form.postalCode" label="Postal code" autocomplete="postal-code" :error="errors.postalCode" required />
-            </div>
-
-            <div class="mt-4">
-              <label class="iz-label" for="co-comment">Comment for the courier</label>
-              <textarea id="co-comment" v-model="form.comment" class="iz-input min-h-24" rows="3" placeholder="Entrance, floor, delivery window…" />
-            </div>
-          </section>
-
-          <section class="iz-card">
-            <h2 class="iz-label">Delivery</h2>
-            <div class="mt-4 flex flex-col gap-3">
-              <label
-                v-for="option in deliveryOptions"
-                :key="option.id"
-                class="choice"
-                :class="{ 'choice--active': deliveryMethodId === option.id }"
-              >
-                <input v-model="deliveryMethodId" type="radio" name="delivery" :value="option.id" class="choice__input" >
-                <span class="choice__body">
-                  <span class="choice__title">{{ option.title }}</span>
-                  <span class="choice__meta">{{ option.description }} · {{ formatEta(option.etaDaysMin, option.etaDaysMax) }}</span>
-                </span>
-                <span class="choice__price">{{ option.priceCents > 0 ? formatPrice(option.priceCents) : "Free" }}</span>
-              </label>
-            </div>
-          </section>
-
-          <section class="iz-card">
-            <h2 class="iz-label">Payment</h2>
-            <div class="mt-4 flex flex-col gap-3">
-              <label
-                v-for="method in PAYMENT_METHODS"
-                :key="method.id"
-                class="choice"
-                :class="{ 'choice--active': paymentMethodId === method.id }"
-              >
-                <input v-model="paymentMethodId" type="radio" name="payment" :value="method.id" class="choice__input" >
-                <span class="choice__body">
-                  <span class="choice__title">{{ PAYMENT_METHOD_LABELS[method.id] }}</span>
-                  <span class="choice__meta">{{ method.description }}</span>
-                </span>
-              </label>
-            </div>
-            <p class="mt-4 text-xs leading-relaxed text-[var(--iz-muted)]">
-              Card details are never entered on this site — the payment provider collects them on its own page.
-            </p>
-          </section>
-        </div>
-
-        <aside class="lg:sticky lg:top-24">
-          <CartSummary :totals="preview.totals" title="Order summary">
-            <ul class="flex flex-col gap-1.5 border-t border-[var(--iz-border-soft)] pt-3 text-xs text-[var(--iz-muted)]">
-              <li v-for="line in preview.lines" :key="line.variantId" class="flex justify-between gap-3">
-                <span class="truncate">{{ line.quantity }} × {{ line.title }}</span>
-                <span class="tabular-nums">{{ formatPrice(line.lineTotalCents) }}</span>
+          <div
+            v-if="submitAttempted && errorList.length"
+            ref="summaryRef"
+            class="error-summary"
+            role="alert"
+            tabindex="-1"
+            data-testid="error-summary"
+          >
+            <h3>Please check {{ errorList.length === 1 ? "1 field" : `${errorList.length} fields` }}</h3>
+            <ul>
+              <li v-for="item in errorList" :key="item.field">
+                <a :href="`#${fieldId(item.field)}`" @click.prevent="focusField(item.field)">
+                  {{ item.label }}: {{ item.message }}
+                </a>
               </li>
             </ul>
+          </div>
 
-            <p v-if="submitError" class="iz-error" role="alert">{{ submitError }}</p>
+          <fieldset class="checkout__section">
+            <legend class="checkout__legend">Contact details</legend>
+            <div class="checkout__grid">
+              <UiFormField
+                :id="fieldId('fullName')"
+                v-model="form.fullName"
+                class="checkout__full"
+                label="Full name"
+                autocomplete="name"
+                :maxlength="100"
+                :error="errors.fullName"
+                required
+                @blur="onBlur('fullName')"
+              />
+              <UiFormField
+                :id="fieldId('email')"
+                v-model="form.email"
+                label="Email"
+                type="email"
+                inputmode="email"
+                autocomplete="email"
+                :maxlength="120"
+                :error="errors.email"
+                required
+                @blur="onBlur('email')"
+              />
+              <UiFormField
+                :id="fieldId('phone')"
+                v-model="form.phone"
+                label="Phone"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                hint="Include the country code, for example +1 555 010 0123."
+                :maxlength="24"
+                :error="errors.phone"
+                required
+                @blur="onBlur('phone')"
+              />
+            </div>
+          </fieldset>
 
+          <fieldset class="checkout__section">
+            <legend class="checkout__legend">Delivery address</legend>
+            <div class="checkout__grid">
+              <UiFormField
+                :id="fieldId('country')"
+                v-model="form.country"
+                label="Country"
+                autocomplete="country-name"
+                :maxlength="60"
+                :error="errors.country"
+                required
+                @blur="onBlur('country')"
+              />
+              <UiFormField
+                :id="fieldId('city')"
+                v-model="form.city"
+                label="City"
+                autocomplete="address-level2"
+                :maxlength="80"
+                :error="errors.city"
+                required
+                @blur="onBlur('city')"
+              />
+              <UiFormField
+                :id="fieldId('street')"
+                v-model="form.street"
+                class="checkout__full"
+                label="Street address"
+                autocomplete="street-address"
+                placeholder="Street, building, apartment"
+                :maxlength="150"
+                :error="errors.street"
+                required
+                @blur="onBlur('street')"
+              />
+              <UiFormField
+                :id="fieldId('postalCode')"
+                v-model="form.postalCode"
+                label="Postal code"
+                autocomplete="postal-code"
+                :maxlength="10"
+                :error="errors.postalCode"
+                required
+                @blur="onBlur('postalCode')"
+              />
+              <UiFormField
+                :id="fieldId('comment')"
+                v-model="form.comment"
+                class="checkout__full"
+                label="Delivery note"
+                multiline
+                :maxlength="COMMENT_MAX_LENGTH"
+                :hint="`Up to ${COMMENT_MAX_LENGTH} characters.`"
+                :error="errors.comment"
+                @blur="onBlur('comment')"
+              />
+            </div>
+          </fieldset>
+
+          <fieldset class="checkout__section">
+            <legend class="checkout__legend">Delivery method</legend>
+            <p class="checkout__hint">Sample options that show how delivery changes the total. Final terms are not published yet.</p>
+            <div class="delivery">
+              <label v-for="option in deliveryOptions" :key="option.id" class="delivery__option">
+                <input v-model="deliveryMethodId" type="radio" name="delivery" :value="option.id" class="delivery__radio">
+                <span class="delivery__body">
+                  <span class="delivery__title">{{ option.title }}</span>
+                  <span class="delivery__text">{{ option.description }} {{ formatEta(option.etaDaysMin, option.etaDaysMax) }}.</span>
+                </span>
+                <span class="delivery__price">{{ option.priceCents > 0 ? formatPrice(option.priceCents) : "Free" }}</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <section class="checkout__section" aria-labelledby="payment-heading">
+            <h3 id="payment-heading" class="checkout__legend">Payment</h3>
+            <p class="checkout__hint">
+              Payment is not part of this preview. Payment methods will be added together with the order service.
+            </p>
+          </section>
+
+          <div class="checkout__actions">
             <button
               type="submit"
-              class="iz-btn iz-btn--solid iz-btn--block"
-              :disabled="!canSubmit || isLoading"
-              data-testid="place-order"
+              class="iz-btn iz-btn--solid"
+              :disabled="!canCheckout || isSubmitting"
+              data-testid="checkout-submit"
             >
-              {{ isSubmitting ? "Placing order…" : "Place order" }}
+              Check details (demo)
             </button>
+            <button type="button" class="iz-btn iz-btn--quiet" @click="resetForm">Clear form</button>
+          </div>
+          <p v-if="!canCheckout && !isLoading" class="iz-error">
+            Your cart has out-of-stock items. <NuxtLink to="/cart" class="iz-link">Review your cart</NuxtLink> to continue.
+          </p>
 
-            <NuxtLink to="/cart" class="iz-btn iz-btn--quiet iz-btn--block">Back to cart</NuxtLink>
+          <div
+            v-if="result"
+            ref="resultRef"
+            class="result"
+            role="status"
+            tabindex="-1"
+            data-testid="checkout-result"
+          >
+            <UiIcon name="info" />
+            <div>
+              <h3>Your details look complete</h3>
+              <p>{{ result }}</p>
+              <NuxtLink to="/shop" class="iz-link mt-2 inline-block">Continue browsing</NuxtLink>
+            </div>
+          </div>
+        </form>
+
+        <aside class="checkout__aside" aria-label="Order summary">
+          <CartSummary :totals="preview.totals" title="Order summary">
+            <ul class="mini-lines">
+              <li v-for="line in preview.lines" :key="line.productId + line.variantId">
+                <span class="mini-lines__title">
+                  {{ line.title }}
+                  <span>{{ line.variantLabel }} · × {{ line.quantity }}</span>
+                </span>
+                <span class="mini-lines__price">{{ formatPrice(line.lineTotalCents) }}</span>
+              </li>
+            </ul>
+            <NuxtLink to="/cart" class="iz-link text-sm">Edit cart</NuxtLink>
           </CartSummary>
         </aside>
-      </form>
+      </div>
     </ClientOnly>
   </div>
 </template>
 
 <style scoped>
-.choice {
+.checkout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  align-items: start;
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+}
+
+.checkout__form {
   display: flex;
-  align-items: center;
-  gap: 0.9rem;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.checkout__section {
+  padding: clamp(1.15rem, 2vw, 1.6rem);
+  border: 1px solid var(--iz-border);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 0.015);
+}
+
+.checkout__legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 1rem;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.checkout__legend + * {
+  clear: both;
+}
+
+.checkout__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.checkout__full {
+  grid-column: 1 / -1;
+}
+
+.checkout__hint {
+  margin-bottom: 1rem;
+  color: var(--iz-muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.checkout__section > .checkout__hint:last-child {
+  margin-bottom: 0;
+}
+
+.delivery {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.delivery__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--iz-border);
   border-radius: 0.85rem;
   cursor: pointer;
   transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease;
+    border-color 0.18s ease,
+    background-color 0.18s ease;
 }
 
-.choice:hover {
-  border-color: rgb(255 255 255 / 0.2);
+.delivery__option:hover {
+  border-color: rgb(255 255 255 / 0.24);
 }
 
-.choice--active {
+.delivery__option:has(input:checked) {
   border-color: var(--iz-accent);
   background: rgb(143 192 238 / 0.08);
 }
 
-.choice__input {
-  height: 1.1rem;
+.delivery__radio {
   width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
   flex-shrink: 0;
-  accent-color: #4da3ff;
+  accent-color: var(--iz-accent-strong);
 }
 
-.choice__body {
+.delivery__body {
   display: flex;
   min-width: 0;
   flex: 1;
@@ -261,22 +441,135 @@ useSeo({ title: "Checkout", description: "Delivery details and payment for your 
   gap: 0.15rem;
 }
 
-.choice__title {
+.delivery__title {
   color: #fff;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   font-weight: 500;
 }
 
-.choice__meta {
+.delivery__text {
   color: var(--iz-muted);
-  font-size: 0.8rem;
-  line-height: 1.4;
+  font-size: 0.83rem;
 }
 
-.choice__price {
-  flex-shrink: 0;
-  color: #e7eef6;
-  font-size: 0.9rem;
+.delivery__price {
+  color: #fff;
+  font-size: 0.93rem;
   font-variant-numeric: tabular-nums;
+}
+
+.checkout__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.error-summary {
+  padding: 1rem 1.15rem;
+  border: 1px solid rgb(248 113 113 / 0.45);
+  border-radius: 0.9rem;
+  background: rgb(248 113 113 / 0.07);
+}
+
+.error-summary h3 {
+  color: #fecaca;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.error-summary ul {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+}
+
+.error-summary a {
+  color: var(--iz-danger);
+  font-size: 0.87rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.result {
+  display: flex;
+  gap: 0.85rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid rgb(143 192 238 / 0.4);
+  border-radius: 1rem;
+  background: rgb(143 192 238 / 0.07);
+}
+
+.result > svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+  color: var(--iz-accent);
+}
+
+.result h3 {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.result p {
+  margin-top: 0.35rem;
+  color: #d6e6f6;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.checkout__aside {
+  position: sticky;
+  top: 6rem;
+}
+
+.mini-lines {
+  display: grid;
+  gap: 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--iz-border-soft);
+}
+
+.mini-lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  font-size: 0.88rem;
+}
+
+.mini-lines__title {
+  display: flex;
+  flex-direction: column;
+  color: #e7eef6;
+}
+
+.mini-lines__title span {
+  color: var(--iz-muted);
+  font-size: 0.8rem;
+}
+
+.mini-lines__price {
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 1023px) {
+  .checkout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .checkout__aside {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .checkout__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

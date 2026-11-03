@@ -1,28 +1,31 @@
 <script setup lang="ts">
 import type { ProductListItem } from "#shared/types";
-import { formatPrice } from "~/utils/format";
+import { formatInches, formatPrice, formatStorage } from "~/utils/format";
 import { useFavoritesStore } from "~/stores/favorites";
 
-const props = defineProps<{ product: ProductListItem }>();
+const props = withDefaults(defineProps<{ product: ProductListItem; headingLevel?: "h2" | "h3" }>(), {
+  headingLevel: "h3",
+});
 
 const favorites = useFavoritesStore();
 const isSaved = computed(() => favorites.has(props.product.id));
+
+const storageSummary = computed(() => props.product.storageOptionsGb.map(formatStorage).join(" / "));
 </script>
 
 <template>
-  <article class="card">
-    <NuxtLink :to="`/product/${product.slug}`" class="card__media">
-      <img
-        :src="assetUrl(product.image)"
+  <article class="card" :class="{ 'card--muted': !product.inStock }" data-testid="product-card">
+    <div class="card__media">
+      <UiSafeImage
+        :src="product.image"
         :alt="product.title"
-        width="240"
-        height="320"
-        loading="lazy"
-        decoding="async"
-      >
+        :width="320"
+        :height="320"
+        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 45vw, 90vw"
+      />
       <span v-if="product.badge" class="card__badge">{{ product.badge }}</span>
       <span v-if="!product.inStock" class="card__badge card__badge--muted">Out of stock</span>
-    </NuxtLink>
+    </div>
 
     <ClientOnly>
       <button
@@ -30,7 +33,7 @@ const isSaved = computed(() => favorites.has(props.product.id));
         class="card__fav"
         :class="{ 'card__fav--on': isSaved }"
         :aria-pressed="isSaved"
-        :aria-label="isSaved ? `Remove ${product.title} from saved` : `Save ${product.title}`"
+        :aria-label="`Save ${product.title}`"
         @click="favorites.toggle(product.id)"
       >
         <svg viewBox="0 0 24 24" :fill="isSaved ? 'currentColor' : 'none'" aria-hidden="true">
@@ -45,19 +48,31 @@ const isSaved = computed(() => favorites.has(props.product.id));
     </ClientOnly>
 
     <div class="card__body">
-      <h3 class="card__title">
-        <NuxtLink :to="`/product/${product.slug}`">{{ product.title }}</NuxtLink>
-      </h3>
+      <component :is="headingLevel" class="card__title">
+        <NuxtLink :to="`/product/${product.slug}`" class="card__link">{{ product.title }}</NuxtLink>
+      </component>
       <p class="card__tagline">{{ product.tagline }}</p>
+
+      <ul class="card__specs" aria-label="Key specifications">
+        <li>{{ formatInches(product.displayInches) }} display</li>
+        <li>{{ product.batteryMah }} mAh</li>
+        <li>{{ storageSummary }}</li>
+      </ul>
 
       <div class="card__foot">
         <p class="card__price">
           <span class="card__price-label">From</span>
-          <span class="card__price-value">{{ formatPrice(product.fromPriceCents) }}</span>
+          <span class="card__price-value" data-testid="card-price">{{ formatPrice(product.fromPriceCents) }}</span>
         </p>
-        <NuxtLink :to="`/product/${product.slug}`" class="iz-btn iz-btn--ghost card__cta">
-          {{ product.inStock ? "Configure" : "Details" }}
-        </NuxtLink>
+        <ul class="card__colors" :aria-label="`Colours: ${product.colors.map((color) => color.name).join(', ')}`">
+          <li
+            v-for="color in product.colors"
+            :key="color.name"
+            class="card__swatch"
+            :style="{ background: color.hex }"
+            :title="color.name"
+          />
+        </ul>
       </div>
     </div>
   </article>
@@ -75,27 +90,42 @@ const isSaved = computed(() => favorites.has(props.product.id));
   background: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.01));
   transition:
     border-color 0.25s ease,
-    transform 0.25s ease;
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
-.card:hover {
+.card:hover,
+.card:focus-within {
   transform: translateY(-4px);
-  border-color: rgb(255 255 255 / 0.16);
+  border-color: rgb(143 192 238 / 0.35);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 0.35);
 }
 
 .card__media {
   position: relative;
   display: flex;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   align-items: center;
   justify-content: center;
-  background: #000;
+  overflow: hidden;
+  background: radial-gradient(70% 60% at 50% 45%, rgb(30 104 200 / 0.18), rgb(0 0 0 / 0) 70%), #000;
 }
 
-.card__media img {
-  max-height: 100%;
+.card__media :deep(img) {
+  max-height: 88%;
+  max-width: 88%;
   width: auto;
+  height: auto;
   object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .card__media :deep(img) {
+  transform: scale(1.04);
+}
+
+.card--muted .card__media :deep(img) {
+  opacity: 0.6;
 }
 
 .card__badge {
@@ -105,7 +135,7 @@ const isSaved = computed(() => favorites.has(props.product.id));
   padding: 0.25rem 0.6rem;
   border: 1px solid rgb(143 192 238 / 0.35);
   border-radius: 999px;
-  background: rgb(10 20 40 / 0.75);
+  background: rgb(10 20 40 / 0.8);
   color: var(--iz-accent);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
@@ -115,22 +145,23 @@ const isSaved = computed(() => favorites.has(props.product.id));
 .card__badge--muted {
   top: auto;
   bottom: 0.75rem;
-  border-color: rgb(255 255 255 / 0.16);
-  color: #9aa8b8;
+  border-color: rgb(255 255 255 / 0.2);
+  color: #b4c0cd;
 }
 
 .card__fav {
   position: absolute;
   top: 0.6rem;
   right: 0.6rem;
+  z-index: 2;
   display: inline-flex;
-  height: 2.5rem;
-  width: 2.5rem;
+  height: 2.75rem;
+  width: 2.75rem;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: rgb(5 8 15 / 0.6);
-  color: #9aa8b8;
+  background: rgb(5 8 15 / 0.65);
+  color: #b4c0cd;
   transition:
     color 0.2s ease,
     background-color 0.2s ease;
@@ -138,7 +169,7 @@ const isSaved = computed(() => favorites.has(props.product.id));
 
 .card__fav:hover {
   color: #fff;
-  background: rgb(5 8 15 / 0.85);
+  background: rgb(5 8 15 / 0.9);
 }
 
 .card__fav--on {
@@ -156,25 +187,57 @@ const isSaved = computed(() => favorites.has(props.product.id));
   flex: 1;
   flex-direction: column;
   gap: 0.35rem;
-  padding: 1rem 1.1rem 1.15rem;
+  padding: 1rem 1.15rem 1.2rem;
 }
 
 .card__title {
   color: #fff;
-  font-size: 1.02rem;
+  font-size: 1.05rem;
   font-weight: 600;
+}
+
+/* Stretched link: the whole card is one target and one tab stop. */
+.card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.card__link:focus-visible {
+  outline: none;
+}
+
+.card:has(.card__link:focus-visible) {
+  outline: 2px solid var(--iz-accent);
+  outline-offset: 3px;
 }
 
 .card__tagline {
   color: var(--iz-muted);
-  font-size: 0.83rem;
+  font-size: 0.85rem;
   font-weight: 300;
   line-height: 1.45;
 }
 
-.card__foot {
+.card__specs {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.card__specs li {
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--iz-border-soft);
+  border-radius: 999px;
+  color: #c3cfdc;
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+
+.card__foot {
+  display: flex;
   align-items: end;
   justify-content: space-between;
   gap: 0.75rem;
@@ -184,7 +247,7 @@ const isSaved = computed(() => favorites.has(props.product.id));
 
 .card__price-label {
   display: block;
-  color: #6f8095;
+  color: var(--iz-faint);
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -192,14 +255,21 @@ const isSaved = computed(() => favorites.has(props.product.id));
 
 .card__price-value {
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.card__cta {
-  min-height: 2.5rem;
-  padding: 0.55rem 1.15rem;
-  font-size: 0.85rem;
+.card__colors {
+  display: flex;
+  gap: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+.card__swatch {
+  height: 0.9rem;
+  width: 0.9rem;
+  border: 1px solid rgb(255 255 255 / 0.4);
+  border-radius: 999px;
 }
 </style>
