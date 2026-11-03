@@ -122,22 +122,18 @@ useHead({
 
 <template>
   <div v-if="product" class="iz-wrap iz-page">
-    <nav aria-label="Breadcrumb" class="crumbs">
-      <ol>
-        <li><NuxtLink to="/">Home</NuxtLink></li>
-        <li><NuxtLink to="/shop">Catalog</NuxtLink></li>
-        <li><span aria-current="page">{{ product.title }}</span></li>
-      </ol>
-    </nav>
+    <NuxtLink to="/shop" class="back-link">
+      <UiIcon name="arrow-left" />
+      All devices
+    </NuxtLink>
 
     <div class="product">
       <ProductGallery :images="product.images" :title="product.title" />
 
       <div class="product__info">
         <div>
-          <p class="iz-eyebrow">{{ product.badge ?? "IZ OS smartphone" }}</p>
-          <h1 class="iz-h1 mt-2">{{ product.title }}</h1>
-          <p class="product__tagline">{{ product.tagline }}</p>
+          <p class="iz-eyebrow">{{ product.tagline }}</p>
+          <h1 class="iz-h1 mt-3">{{ product.title }}</h1>
           <p class="product__description">{{ product.description }}</p>
         </div>
 
@@ -292,34 +288,30 @@ useHead({
 </template>
 
 <style scoped>
-.crumbs ol {
-  display: flex;
-  flex-wrap: wrap;
+.back-link {
+  display: inline-flex;
+  align-items: center;
   gap: 0.5rem;
-  margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
+  margin-bottom: 2rem;
   color: var(--iz-muted);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
 }
 
-.crumbs li + li::before {
-  content: "/";
-  margin-right: 0.5rem;
-  color: var(--iz-faint);
-}
-
-.crumbs a:hover {
+.back-link:hover {
   color: #fff;
 }
 
-.crumbs [aria-current] {
-  color: #dfe8f2;
+.back-link svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 .product {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: clamp(2rem, 4.5vw, 4.5rem);
+  gap: 3.5rem;
 }
 
 .product > :first-child {
@@ -331,12 +323,6 @@ useHead({
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-}
-
-.product__tagline {
-  margin-top: 0.5rem;
-  color: #dfe8f2;
-  font-size: 1.05rem;
 }
 
 .product__description {

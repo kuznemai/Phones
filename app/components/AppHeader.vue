@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NAV_LINKS, SITE } from "~/data/site";
+import { SITE } from "~/data/site";
 import { useCartStore } from "~/stores/cart";
 import { useFavoritesStore } from "~/stores/favorites";
 
@@ -8,6 +8,16 @@ withDefaults(defineProps<{ overlay?: boolean }>(), { overlay: false });
 const cart = useCartStore();
 const favorites = useFavoritesStore();
 const route = useRoute();
+
+const NAV = [
+  { label: "Home", to: "/" },
+  { label: "Devices", to: "/shop" },
+  { label: "Technology", to: "/security" },
+  { label: "Support", to: "/contact" },
+];
+
+/** The drawer also links the pages that do not fit in the desktop bar. */
+const DRAWER_NAV = [...NAV, { label: "About", to: "/about" }, { label: "FAQ", to: "/faq" }];
 
 const isMenuOpen = ref(false);
 const drawer = ref<HTMLElement | null>(null);
@@ -20,6 +30,7 @@ const cartLabel = computed(() =>
 const savedLabel = computed(() => (favorites.count > 0 ? `Saved devices, ${favorites.count}` : "Saved devices"));
 
 function isActive(to: string): boolean {
+  if (to === "/") return route.path === "/";
   return route.path === to || route.path.startsWith(`${to}/`) || (to === "/shop" && route.path.startsWith("/product/"));
 }
 
@@ -81,7 +92,7 @@ onBeforeUnmount(() => {
 
       <nav class="site-nav" aria-label="Main">
         <NuxtLink
-          v-for="link in NAV_LINKS"
+          v-for="link in NAV"
           :key="link.to"
           :to="link.to"
           :class="{ 'is-active': isActive(link.to) }"
@@ -123,20 +134,22 @@ onBeforeUnmount(() => {
           </ClientOnly>
         </NuxtLink>
 
-        <button
-          ref="burger"
-          type="button"
-          class="icon-btn burger"
-          :aria-expanded="isMenuOpen"
-          aria-controls="mobile-menu"
-          aria-label="Open menu"
-          @click="openMenu"
-        >
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-          </svg>
-        </button>
+        <NuxtLink to="/shop" class="header-cta">Shop Now</NuxtLink>
       </div>
+
+      <button
+        ref="burger"
+        type="button"
+        class="burger"
+        :aria-expanded="isMenuOpen"
+        aria-controls="mobile-menu"
+        aria-label="Open menu"
+        @click="openMenu"
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      </button>
     </div>
 
     <Transition name="drawer">
@@ -163,9 +176,8 @@ onBeforeUnmount(() => {
         </div>
 
         <nav class="drawer__nav iz-wrap" aria-label="Mobile">
-          <NuxtLink to="/" :aria-current="route.path === '/' ? 'page' : undefined">Home</NuxtLink>
           <NuxtLink
-            v-for="link in NAV_LINKS"
+            v-for="link in DRAWER_NAV"
             :key="link.to"
             :to="link.to"
             :aria-current="isActive(link.to) ? 'page' : undefined"
@@ -173,11 +185,13 @@ onBeforeUnmount(() => {
             {{ link.label }}
           </NuxtLink>
           <NuxtLink to="/favorites">
-            Saved devices <span v-if="favorites.count > 0" class="drawer__count">{{ favorites.count }}</span>
+            Saved devices<span v-if="favorites.count > 0" class="drawer__count">({{ favorites.count }})</span>
           </NuxtLink>
           <NuxtLink to="/cart">
-            Cart <span v-if="cart.count > 0" class="drawer__count">{{ cart.count }}</span>
+            Cart<span v-if="cart.count > 0" class="drawer__count">({{ cart.count }})</span>
           </NuxtLink>
+
+          <NuxtLink to="/shop" class="iz-btn iz-btn--solid mt-4 self-start">Shop Now</NuxtLink>
         </nav>
       </div>
     </Transition>
@@ -195,7 +209,7 @@ onBeforeUnmount(() => {
   right: 0;
   left: 0;
   z-index: 100;
-  background: linear-gradient(180deg, rgb(5 7 13 / 0.7), rgb(5 7 13 / 0));
+  background: transparent;
 }
 
 .site-header--solid {
@@ -212,7 +226,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding-block: clamp(0.75rem, 1.4vw, 1.25rem);
+  padding-block: clamp(0.85rem, 1.6vw, 1.5rem);
 }
 
 /* ---------------------------------------------------------------- brand */
@@ -224,13 +238,13 @@ onBeforeUnmount(() => {
 }
 
 .brand__mark {
-  height: clamp(1.6rem, 2.4vw, 2.2rem);
+  height: clamp(1.6rem, 2.6vw, 2.4rem);
   width: auto;
 }
 
 .brand__tag {
   color: #cfe0f2;
-  font-size: clamp(0.55rem, 0.75vw, 0.68rem);
+  font-size: clamp(0.55rem, 0.75vw, 0.7rem);
   line-height: 1.7;
   letter-spacing: 0.26em;
   text-transform: uppercase;
@@ -241,46 +255,27 @@ onBeforeUnmount(() => {
 .site-nav {
   display: none;
   align-items: center;
-  gap: clamp(1.1rem, 2.2vw, 2.4rem);
+  gap: clamp(1.25rem, 2.6vw, 2.75rem);
 }
 
 .site-nav a {
-  position: relative;
-  padding-block: 0.5rem;
-  color: #dfe8f2;
-  font-size: clamp(0.86rem, 1vw, 0.95rem);
+  color: #e7eef6;
+  font-size: clamp(0.86rem, 1.1vw, 1rem);
   white-space: nowrap;
   transition: color 0.2s ease;
 }
 
-.site-nav a::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0.15rem;
-  left: 0;
-  height: 1px;
-  background: var(--iz-accent);
-  transform: scaleX(0);
-  transition: transform 0.25s ease;
-}
-
 .site-nav a:hover,
 .site-nav a.is-active {
-  color: #fff;
-}
-
-.site-nav a.is-active::after,
-.site-nav a:hover::after {
-  transform: scaleX(1);
+  color: var(--iz-accent);
 }
 
 /* -------------------------------------------------------------- actions */
 .site-actions {
-  display: flex;
+  display: none;
   flex-shrink: 0;
   align-items: center;
-  gap: clamp(0.15rem, 0.6vw, 0.5rem);
+  gap: clamp(0.35rem, 0.8vw, 0.7rem);
 }
 
 .icon-btn {
@@ -303,26 +298,65 @@ onBeforeUnmount(() => {
 }
 
 .icon-btn svg {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.45rem;
+  height: 1.45rem;
 }
 
 .icon-btn__badge {
   position: absolute;
-  top: 0.3rem;
-  right: 0.15rem;
-  min-width: 1.1rem;
-  padding: 0 0.28rem;
+  top: 0.35rem;
+  right: 0.2rem;
+  min-width: 1.05rem;
+  padding: 0 0.25rem;
   border-radius: 999px;
   background: var(--iz-accent-strong);
   color: #04070f;
-  font-size: 0.66rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  line-height: 1.1rem;
+  line-height: 1.05rem;
   text-align: center;
 }
 
+.header-cta {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  margin-left: clamp(0.3rem, 0.8vw, 0.9rem);
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #05080f;
+  font-size: clamp(0.86rem, 1.05vw, 0.98rem);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.header-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgb(120 180 255 / 0.3);
+}
+
 /* --------------------------------------------------------------- drawer */
+.burger {
+  display: inline-flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #fff;
+}
+
+.burger svg {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
 .drawer {
   position: fixed;
   inset: 0;
@@ -337,24 +371,23 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-block: 0.75rem;
+  padding-block: 1rem;
   border-bottom: 1px solid var(--iz-border-soft);
 }
 
 .drawer__nav {
   display: flex;
   flex-direction: column;
-  padding-block: 1rem 3rem;
+  gap: 0.25rem;
+  padding-block: 1.5rem 3rem;
 }
 
 .drawer__nav a {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding-block: 0.95rem;
+  padding-block: 0.9rem;
   border-bottom: 1px solid var(--iz-border-soft);
   color: #e7eef6;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  text-align: left;
 }
 
 .drawer__nav a:hover,
@@ -362,33 +395,29 @@ onBeforeUnmount(() => {
   color: var(--iz-accent);
 }
 
+.drawer__nav a.iz-btn {
+  border-bottom: 0;
+  color: #05080f;
+}
+
 .drawer__count {
-  min-width: 1.4rem;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  background: var(--iz-accent-strong);
-  color: #04070f;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.4rem;
-  text-align: center;
+  margin-left: 0.4rem;
+  color: var(--iz-accent);
 }
 
 .drawer-enter-active,
 .drawer-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .drawer-enter-from,
 .drawer-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
 }
 
 @media (min-width: 1024px) {
-  .site-nav {
+  .site-nav,
+  .site-actions {
     display: flex;
   }
 

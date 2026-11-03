@@ -29,7 +29,9 @@ useHead({
     <LandingWhySection />
     <LandingExperienceSection />
     <LandingHardwareSection />
-    <LandingFaqPreviewSection />
+    <LandingCompareSection />
+    <LandingAudienceSection />
+    <LandingFaqSection />
     <LandingCtaSection />
   </div>
 </template>

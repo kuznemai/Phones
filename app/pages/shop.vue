@@ -77,44 +77,18 @@ useSeo({
 
 <template>
   <div class="iz-wrap iz-page">
-    <UiPageHeader
-      eyebrow="Catalog"
-      title="Smartphones running IZ OS"
-      lead="Every model ships with the same privacy-focused operating system. Choose the size, battery and storage that suit you."
-    />
-
-    <UiNotice class="mb-8">{{ DEMO_NOTICE.catalog }}</UiNotice>
-
-    <div class="toolbar">
-      <div class="toolbar__search">
-        <label class="sr-only" for="catalog-search">Search devices</label>
-        <UiIcon name="search" class="toolbar__search-icon" />
-        <input
-          id="catalog-search"
-          v-model="searchInput"
-          class="iz-input toolbar__search-input"
-          type="search"
-          placeholder="Search by name or feature"
-          autocomplete="off"
-          enterkeyhint="search"
-          maxlength="80"
-        >
+    <header class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="iz-eyebrow">Catalogue</p>
+        <h1 class="iz-h1 mt-3">Our devices</h1>
+        <p class="mt-3 max-w-xl text-sm text-[var(--iz-muted)] sm:text-base">
+          Every model runs IZ OS with the same security features. Pick the size and storage that fit you.
+        </p>
       </div>
 
-      <div class="toolbar__controls">
-        <button
-          type="button"
-          class="iz-btn iz-btn--ghost toolbar__filter-toggle"
-          :aria-expanded="filtersOpen"
-          aria-controls="catalog-filters"
-          @click="filtersOpen = !filtersOpen"
-        >
-          <UiIcon name="filter" />
-          Filters<span v-if="activeFilterCount > 0" class="toolbar__count">{{ activeFilterCount }}</span>
-        </button>
-
-        <div class="toolbar__sort">
-          <label class="iz-label toolbar__sort-label" for="catalog-sort">Sort by</label>
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <div class="w-full sm:w-56">
+          <label class="iz-label" for="catalog-sort">Sort by</label>
           <select
             id="catalog-sort"
             class="iz-input"
@@ -124,24 +98,54 @@ useSeo({
             <option v-for="option in PRODUCT_SORTS" :key="option.value" :value="option.value">{{ option.label }}</option>
           </select>
         </div>
+
+        <div class="w-full sm:w-64">
+          <label class="iz-label" for="catalog-search">Search</label>
+          <input
+            id="catalog-search"
+            v-model="searchInput"
+            class="iz-input"
+            type="search"
+            placeholder="Find a device…"
+            autocomplete="off"
+            enterkeyhint="search"
+            maxlength="80"
+          >
+        </div>
+      </div>
+    </header>
+
+    <div class="filters-bar">
+      <button
+        type="button"
+        class="iz-btn iz-btn--ghost filters-bar__toggle"
+        :aria-expanded="filtersOpen"
+        aria-controls="catalog-filters"
+        @click="filtersOpen = !filtersOpen"
+      >
+        <UiIcon name="filter" />
+        Filters<span v-if="activeFilterCount > 0" class="filters-bar__count">{{ activeFilterCount }}</span>
+      </button>
+      <div
+        id="catalog-filters"
+        class="filters-bar__panel"
+        :class="{ 'filters-bar__panel--open': filtersOpen }"
+        role="group"
+        aria-label="Filters"
+      >
+        <ProductFilters v-if="facets" v-model="filters" :facets="facets" @clear="clearFilters" />
       </div>
     </div>
 
     <div class="layout">
-      <aside
-        id="catalog-filters"
-        class="layout__filters"
-        :class="{ 'layout__filters--open': filtersOpen }"
-        aria-label="Filters"
-      >
-        <ProductFilters v-if="facets" v-model="filters" :facets="facets" @clear="clearFilters" />
-      </aside>
-
       <section class="layout__results" aria-labelledby="results-heading">
-        <h2 id="results-heading" class="results__count" aria-live="polite">
-          <template v-if="!isLoading">{{ resultLabel }}</template>
-          <template v-else>Loading devices</template>
-        </h2>
+        <div class="results__head">
+          <h2 id="results-heading" class="results__count" aria-live="polite">
+            <template v-if="!isLoading">{{ resultLabel }}</template>
+            <template v-else>Loading devices</template>
+          </h2>
+          <p class="results__note">{{ DEMO_NOTICE.catalog }}</p>
+        </div>
 
         <UiStateBlock
           v-if="error"
@@ -172,47 +176,24 @@ useSeo({
 </template>
 
 <style scoped>
-.toolbar {
-  display: flex;
+.filters-bar {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--iz-border-soft);
+}
+
+.filters-bar :deep(.filters) {
+  flex-direction: row;
   flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.75rem;
+  align-items: flex-end;
+  gap: 1.25rem 2.25rem;
 }
 
-.toolbar__search {
-  position: relative;
-  flex: 1 1 18rem;
-  max-width: 30rem;
+.filters-bar__toggle {
+  display: none;
 }
 
-.toolbar__search-icon {
-  position: absolute;
-  top: 50%;
-  left: 0.95rem;
-  width: 1.1rem;
-  height: 1.1rem;
-  color: var(--iz-muted);
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.toolbar__search-input {
-  padding-left: 2.6rem;
-}
-
-.toolbar__controls {
-  display: flex;
-  align-items: end;
-  gap: 0.75rem;
-}
-
-.toolbar__sort {
-  width: 13.5rem;
-}
-
-.toolbar__count {
+.filters-bar__count {
   min-width: 1.3rem;
   margin-left: 0.15rem;
   padding: 0 0.35rem;
@@ -224,73 +205,52 @@ useSeo({
   line-height: 1.3rem;
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 15.5rem minmax(0, 1fr);
-  align-items: start;
-  gap: clamp(1.5rem, 3vw, 2.75rem);
-}
-
-.layout__filters {
-  position: sticky;
-  top: 6rem;
+.results__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .results__count {
-  margin-bottom: 1rem;
   color: var(--iz-muted);
   font-size: 0.85rem;
   font-weight: 400;
 }
 
-.toolbar__filter-toggle {
-  display: none;
+.results__note {
+  color: #6f8095;
+  font-size: 0.78rem;
 }
 
 @media (max-width: 1023px) {
-  .layout {
-    grid-template-columns: minmax(0, 1fr);
+  .filters-bar {
+    padding-bottom: 0;
+    border-bottom: 0;
   }
 
-  .toolbar__filter-toggle {
+  .filters-bar__toggle {
     display: inline-flex;
   }
 
-  .layout__filters {
-    position: static;
+  .filters-bar__panel {
     display: none;
+    margin-top: 1rem;
     padding: 1.25rem;
     border: 1px solid var(--iz-border);
     border-radius: 1rem;
     background: rgb(255 255 255 / 0.02);
   }
 
-  .layout__filters--open {
+  .filters-bar__panel--open {
     display: block;
   }
-}
 
-@media (max-width: 560px) {
-  .toolbar__search {
-    max-width: none;
-    flex-basis: 100%;
-  }
-
-  .toolbar__controls {
-    width: 100%;
-  }
-
-  .toolbar__sort {
-    flex: 1;
-    width: auto;
-  }
-
-  .toolbar__sort-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
+  .filters-bar :deep(.filters) {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>

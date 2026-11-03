@@ -24,8 +24,8 @@ async function addToCart(page: Page, slug: string): Promise<void> {
 test("every public page opens from a direct link without console errors", async ({ page }) => {
   const errors = watchConsole(page);
   const pages: [string, string][] = [
-    ["/", "Privacy built in, not bolted on"],
-    ["/shop", "Smartphones running IZ OS"],
+    ["/", "Next-Gen Security in Your Hands"],
+    ["/shop", "Our devices"],
     ["/product/iz-one-pro", "IZ One Pro"],
     ["/cart", "Your cart"],
     ["/checkout", "Checkout preview"],
@@ -63,12 +63,12 @@ test.describe("catalog", () => {
     const cards = page.getByTestId("product-card");
     await expect(cards).toHaveCount(6);
 
-    await page.getByLabel("Search devices").fill("wallet");
+    await page.getByLabel("Search", { exact: true }).fill("wallet");
     await expect(page).toHaveURL(/q=wallet/);
     await expect(cards).toHaveCount(1);
     await expect(cards.first()).toContainText("IZ Vault");
 
-    await page.getByLabel("Search devices").fill("");
+    await page.getByLabel("Search", { exact: true }).fill("");
     await expect(cards).toHaveCount(6);
 
     await page.getByLabel("Sort by").selectOption("price-asc");

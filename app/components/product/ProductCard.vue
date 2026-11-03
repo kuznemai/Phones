@@ -10,22 +10,22 @@ const props = withDefaults(defineProps<{ product: ProductListItem; headingLevel?
 const favorites = useFavoritesStore();
 const isSaved = computed(() => favorites.has(props.product.id));
 
-const storageSummary = computed(() => props.product.storageOptionsGb.map(formatStorage).join(" / "));
+const specLine = computed(() =>
+  [
+    `${formatInches(props.product.displayInches)} display`,
+    `${props.product.batteryMah} mAh`,
+    props.product.storageOptionsGb.map(formatStorage).join(" / "),
+  ].join(" · "),
+);
 </script>
 
 <template>
-  <article class="card" :class="{ 'card--muted': !product.inStock }" data-testid="product-card">
-    <div class="card__media">
-      <UiSafeImage
-        :src="product.image"
-        :alt="product.title"
-        :width="320"
-        :height="320"
-        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 45vw, 90vw"
-      />
+  <article class="card" data-testid="product-card">
+    <NuxtLink :to="`/product/${product.slug}`" class="card__media" tabindex="-1" aria-hidden="true">
+      <UiSafeImage :src="product.image" :alt="product.title" :width="240" :height="320" />
       <span v-if="product.badge" class="card__badge">{{ product.badge }}</span>
       <span v-if="!product.inStock" class="card__badge card__badge--muted">Out of stock</span>
-    </div>
+    </NuxtLink>
 
     <ClientOnly>
       <button
@@ -52,27 +52,20 @@ const storageSummary = computed(() => props.product.storageOptionsGb.map(formatS
         <NuxtLink :to="`/product/${product.slug}`" class="card__link">{{ product.title }}</NuxtLink>
       </component>
       <p class="card__tagline">{{ product.tagline }}</p>
-
-      <ul class="card__specs" aria-label="Key specifications">
-        <li>{{ formatInches(product.displayInches) }} display</li>
-        <li>{{ product.batteryMah }} mAh</li>
-        <li>{{ storageSummary }}</li>
-      </ul>
+      <p class="card__specs">{{ specLine }}</p>
 
       <div class="card__foot">
         <p class="card__price">
           <span class="card__price-label">From</span>
           <span class="card__price-value" data-testid="card-price">{{ formatPrice(product.fromPriceCents) }}</span>
         </p>
-        <ul class="card__colors" :aria-label="`Colours: ${product.colors.map((color) => color.name).join(', ')}`">
-          <li
-            v-for="color in product.colors"
-            :key="color.name"
-            class="card__swatch"
-            :style="{ background: color.hex }"
-            :title="color.name"
-          />
-        </ul>
+        <NuxtLink
+          :to="`/product/${product.slug}`"
+          class="iz-btn iz-btn--ghost card__cta"
+          :aria-label="`${product.inStock ? 'Configure' : 'Details for'} ${product.title}`"
+        >
+          {{ product.inStock ? "Configure" : "Details" }}
+        </NuxtLink>
       </div>
     </div>
   </article>
@@ -90,42 +83,30 @@ const storageSummary = computed(() => props.product.storageOptionsGb.map(formatS
   background: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.01));
   transition:
     border-color 0.25s ease,
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+    transform 0.25s ease;
 }
 
-.card:hover,
-.card:focus-within {
+.card:hover {
   transform: translateY(-4px);
-  border-color: rgb(143 192 238 / 0.35);
-  box-shadow: 0 18px 40px rgb(0 0 0 / 0.35);
+  border-color: rgb(255 255 255 / 0.16);
 }
 
 .card__media {
   position: relative;
   display: flex;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   align-items: center;
   justify-content: center;
+  /* Without this a tall image would stretch the box past its 4:3 ratio. */
   overflow: hidden;
-  background: radial-gradient(70% 60% at 50% 45%, rgb(30 104 200 / 0.18), rgb(0 0 0 / 0) 70%), #000;
+  background: #000;
 }
 
 .card__media :deep(img) {
-  max-height: 88%;
-  max-width: 88%;
+  max-height: 100%;
   width: auto;
   height: auto;
   object-fit: contain;
-  transition: transform 0.4s ease;
-}
-
-.card:hover .card__media :deep(img) {
-  transform: scale(1.04);
-}
-
-.card--muted .card__media :deep(img) {
-  opacity: 0.6;
 }
 
 .card__badge {
@@ -135,7 +116,7 @@ const storageSummary = computed(() => props.product.storageOptionsGb.map(formatS
   padding: 0.25rem 0.6rem;
   border: 1px solid rgb(143 192 238 / 0.35);
   border-radius: 999px;
-  background: rgb(10 20 40 / 0.8);
+  background: rgb(10 20 40 / 0.75);
   color: var(--iz-accent);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
@@ -145,23 +126,22 @@ const storageSummary = computed(() => props.product.storageOptionsGb.map(formatS
 .card__badge--muted {
   top: auto;
   bottom: 0.75rem;
-  border-color: rgb(255 255 255 / 0.2);
-  color: #b4c0cd;
+  border-color: rgb(255 255 255 / 0.16);
+  color: #9aa8b8;
 }
 
 .card__fav {
   position: absolute;
   top: 0.6rem;
   right: 0.6rem;
-  z-index: 2;
   display: inline-flex;
-  height: 2.75rem;
-  width: 2.75rem;
+  height: 2.5rem;
+  width: 2.5rem;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: rgb(5 8 15 / 0.65);
-  color: #b4c0cd;
+  background: rgb(5 8 15 / 0.6);
+  color: #9aa8b8;
   transition:
     color 0.2s ease,
     background-color 0.2s ease;
@@ -169,7 +149,7 @@ const storageSummary = computed(() => props.product.storageOptionsGb.map(formatS
 
 .card__fav:hover {
   color: #fff;
-  background: rgb(5 8 15 / 0.9);
+  background: rgb(5 8 15 / 0.85);
 }
 
 .card__fav--on {
@@ -187,57 +167,32 @@ const storageSummary = computed(() => props.product.storageOptionsGb.map(formatS
   flex: 1;
   flex-direction: column;
   gap: 0.35rem;
-  padding: 1rem 1.15rem 1.2rem;
+  padding: 1rem 1.1rem 1.15rem;
 }
 
 .card__title {
   color: #fff;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 600;
-}
-
-/* Stretched link: the whole card is one target and one tab stop. */
-.card__link::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-.card__link:focus-visible {
-  outline: none;
-}
-
-.card:has(.card__link:focus-visible) {
-  outline: 2px solid var(--iz-accent);
-  outline-offset: 3px;
 }
 
 .card__tagline {
   color: var(--iz-muted);
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   font-weight: 300;
   line-height: 1.45;
 }
 
 .card__specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.5rem;
-}
-
-.card__specs li {
-  padding: 0.2rem 0.55rem;
-  border: 1px solid var(--iz-border-soft);
-  border-radius: 999px;
-  color: #c3cfdc;
-  font-size: 0.74rem;
-  white-space: nowrap;
+  margin-top: 0.35rem;
+  color: #a9b8c8;
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .card__foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: end;
   justify-content: space-between;
   gap: 0.75rem;
@@ -247,7 +202,7 @@ const storageSummary = computed(() => props.product.storageOptionsGb.map(formatS
 
 .card__price-label {
   display: block;
-  color: var(--iz-faint);
+  color: #6f8095;
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -255,21 +210,14 @@ const storageSummary = computed(() => props.product.storageOptionsGb.map(formatS
 
 .card__price-value {
   color: #fff;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.card__colors {
-  display: flex;
-  gap: 0.3rem;
-  padding-bottom: 0.3rem;
-}
-
-.card__swatch {
-  height: 0.9rem;
-  width: 0.9rem;
-  border: 1px solid rgb(255 255 255 / 0.4);
-  border-radius: 999px;
+.card__cta {
+  min-height: 2.5rem;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.85rem;
 }
 </style>

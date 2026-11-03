@@ -10,211 +10,95 @@ useSeo({
 </script>
 
 <template>
-  <div class="iz-page">
-    <div class="iz-wrap">
-      <div class="intro">
-        <UiPageHeader
-          eyebrow="Security & OS"
-          title="How IZ OS protects your phone"
-          lead="IZ OS is the operating system on every IZ device. Its protections are on from the first start-up, so you do not have to find and enable them yourself."
-        >
-          <div class="mt-8 flex flex-wrap gap-3">
-            <NuxtLink to="/shop" class="iz-btn iz-btn--solid">
-              Browse devices
-              <UiIcon name="arrow" />
-            </NuxtLink>
-            <a href="#limits" class="iz-btn iz-btn--ghost">What it cannot do</a>
-          </div>
-        </UiPageHeader>
-        <img
-          class="intro__visual"
-          src="/iz-chip.png"
-          alt="IZ secure element surrounded by circuitry"
-          width="900"
-          height="981"
-          fetchpriority="high"
-          decoding="async"
-        >
-      </div>
-    </div>
+  <div class="iz-wrap iz-page">
+    <header class="mx-auto mb-12 max-w-3xl text-center">
+      <p class="iz-eyebrow">Technology</p>
+      <h1 class="iz-h1 mt-3">How IZ OS protects your phone</h1>
+      <p class="mt-4 text-sm leading-relaxed text-[var(--iz-muted)] md:text-base">
+        IZ OS is the operating system on every IZ device. Its protections are on from the first start-up, so you do
+        not have to find and enable them yourself.
+      </p>
+    </header>
 
-    <section class="iz-section" aria-labelledby="features-heading">
-      <div class="iz-wrap">
-        <p class="iz-eyebrow">On every model</p>
-        <h2 id="features-heading" class="iz-h2">Built into IZ OS</h2>
-        <ul class="features">
-          <li v-for="feature in OS_FEATURES" :key="feature.title" class="iz-card iz-reveal">
-            <UiIcon :name="feature.icon" class="iz-card__icon" />
-            <h3 class="iz-card__title">{{ feature.title }}</h3>
-            <p class="iz-card__text">{{ feature.text }}</p>
-          </li>
-        </ul>
-      </div>
+    <section class="iz-card mx-auto mb-10 max-w-4xl text-center" aria-labelledby="together-heading">
+      <h2 id="together-heading" class="text-xl font-medium text-white md:text-2xl">Hardware and software, designed together</h2>
+      <p class="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[var(--iz-muted)] md:text-base">
+        From the secure element that holds your keys to the permissions you grant each app, IZ devices and IZ OS are
+        built as one system.
+      </p>
     </section>
 
-    <section class="iz-section iz-section--tint" aria-labelledby="devices-heading">
-      <div class="iz-wrap iz-split">
-        <div class="iz-reveal">
-          <p class="iz-eyebrow">Model-specific</p>
-          <h2 id="devices-heading" class="iz-h2">Extra hardware<br>protection</h2>
-          <p class="iz-lead">Some models add physical controls or wallet features on top of IZ OS.</p>
+    <h2 class="sr-only">Built into IZ OS</h2>
+    <ul class="mx-auto grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <li v-for="feature in OS_FEATURES" :key="feature.title" class="iz-card flex gap-4">
+        <div class="feature-icon">
+          <UiIcon :name="feature.icon" />
         </div>
-        <ul class="devices">
-          <li v-for="device in DEVICE_FEATURES" :key="device.slug" class="iz-card iz-reveal">
-            <h3 class="devices__model">
-              <NuxtLink :to="`/product/${device.slug}`" class="iz-link">{{ device.model }}</NuxtLink>
-            </h3>
-            <ul class="devices__list">
-              <li v-for="feature in device.features" :key="feature">
-                <UiIcon name="check" />
-                {{ feature }}
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
+        <div class="min-w-0">
+          <h3 class="text-base font-medium text-zinc-100">{{ feature.title }}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-[var(--iz-muted)]">{{ feature.text }}</p>
+        </div>
+      </li>
+    </ul>
+
+    <section class="mx-auto mt-14 max-w-6xl" aria-labelledby="devices-heading">
+      <h2 id="devices-heading" class="mb-6 text-center text-xl font-medium text-white md:text-2xl">
+        Extra protection on selected models
+      </h2>
+      <ul class="grid gap-4 md:grid-cols-3">
+        <li v-for="device in DEVICE_FEATURES" :key="device.slug" class="iz-card">
+          <h3 class="text-base font-medium text-zinc-100">
+            <NuxtLink :to="`/product/${device.slug}`" class="iz-link">{{ device.model }}</NuxtLink>
+          </h3>
+          <ul class="mt-3 flex flex-col gap-2">
+            <li v-for="feature in device.features" :key="feature" class="flex items-start gap-2.5 text-sm text-zinc-300">
+              <UiIcon name="check" class="mt-0.5 h-4 w-4 shrink-0 text-[var(--iz-accent)]" />
+              {{ feature }}
+            </li>
+          </ul>
+        </li>
+      </ul>
     </section>
 
-    <section id="limits" class="iz-section" aria-labelledby="limits-heading">
-      <div class="iz-wrap iz-split">
-        <div class="iz-reveal">
-          <p class="iz-eyebrow">Honest limits</p>
-          <h2 id="limits-heading" class="iz-h2">What IZ OS<br>cannot do for you</h2>
-          <p class="iz-lead">
-            Security is about reducing risk. Knowing where a phone's protection ends helps you make better choices.
-          </p>
-        </div>
-        <ul class="limits iz-reveal">
-          <li v-for="limit in OS_LIMITS" :key="limit">
-            <UiIcon name="info" />
-            <span>{{ limit }}</span>
-          </li>
-        </ul>
-      </div>
+    <section id="limits" class="iz-card mx-auto mt-14 max-w-4xl" aria-labelledby="limits-heading">
+      <h2 id="limits-heading" class="text-center text-xl font-medium text-white md:text-2xl">What IZ OS cannot do for you</h2>
+      <ul class="mx-auto mt-6 flex max-w-2xl flex-col gap-3">
+        <li v-for="limit in OS_LIMITS" :key="limit" class="flex items-start gap-3 text-sm leading-relaxed text-[var(--iz-muted)] md:text-base">
+          <UiIcon name="info" class="mt-1 h-4 w-4 shrink-0 text-[var(--iz-warning)]" />
+          {{ limit }}
+        </li>
+      </ul>
     </section>
 
-    <div class="iz-wrap">
-      <div class="next iz-card iz-reveal">
-        <div>
-          <h2 class="next__title">Still have questions?</h2>
-          <p class="next__text">Read the answers about privacy, apps, updates and this preview store.</p>
-        </div>
-        <div class="flex flex-wrap gap-3">
-          <NuxtLink to="/faq" class="iz-btn iz-btn--ghost">Read the FAQ</NuxtLink>
-          <NuxtLink to="/shop" class="iz-btn iz-btn--solid">Browse devices</NuxtLink>
-        </div>
+    <section class="iz-card mx-auto mt-12 max-w-3xl text-center" aria-label="Next steps">
+      <p class="text-sm leading-relaxed text-[var(--iz-muted)] md:text-base">
+        Every model runs the same IZ OS. Compare sizes, batteries and storage in the catalog, or read the answers to
+        common questions.
+      </p>
+      <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <NuxtLink to="/shop" class="iz-btn iz-btn--solid">View devices</NuxtLink>
+        <NuxtLink to="/faq" class="iz-btn iz-btn--ghost">Read the FAQ</NuxtLink>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <style scoped>
-.intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-  align-items: center;
-  gap: 2rem;
-  padding-bottom: clamp(2rem, 4vw, 3rem);
-}
-
-.intro__visual {
-  width: 100%;
-  max-width: 26rem;
-  height: auto;
-  justify-self: center;
-  filter: drop-shadow(0 24px 70px rgb(20 90 190 / 0.35));
-}
-
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
-  gap: 1rem;
-  margin-top: clamp(1.75rem, 3vw, 2.5rem);
-}
-
-.devices {
-  display: grid;
-  gap: 1rem;
-}
-
-.devices__model {
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-.devices__list {
-  display: grid;
-  gap: 0.5rem;
-  margin-top: 0.85rem;
-}
-
-.devices__list li {
+.feature-icon {
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  color: #d3dde8;
-  font-size: 0.92rem;
-}
-
-.devices__list svg {
-  width: 1.05rem;
-  height: 1.05rem;
+  height: 3rem;
+  width: 3rem;
   flex-shrink: 0;
-  margin-top: 0.2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--iz-border);
+  border-radius: 0.75rem;
+  background: rgb(255 255 255 / 0.03);
   color: var(--iz-accent);
 }
 
-.limits {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.limits li {
-  display: flex;
-  gap: 0.85rem;
-  padding: 1rem 1.15rem;
-  border: 1px solid var(--iz-border-soft);
-  border-radius: 0.9rem;
-  color: #d3dde8;
-  font-size: 0.94rem;
-  line-height: 1.6;
-}
-
-.limits svg {
-  width: 1.2rem;
-  height: 1.2rem;
-  flex-shrink: 0;
-  margin-top: 0.15rem;
-  color: var(--iz-warning);
-}
-
-.next {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-}
-
-.next__title {
-  color: #fff;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.next__text {
-  margin-top: 0.35rem;
-  color: var(--iz-muted);
-  font-size: 0.92rem;
-}
-
-@media (max-width: 860px) {
-  .intro {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .intro__visual {
-    max-width: 18rem;
-  }
+.feature-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 </style>

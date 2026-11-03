@@ -42,8 +42,8 @@ function onKeydown(event: KeyboardEvent): void {
           :key="activeImage"
           :src="activeImage"
           :alt="`${title}, image ${activeIndex + 1} of ${images.length}`"
-          :width="640"
-          :height="640"
+          :width="520"
+          :height="390"
           loading="eager"
           fetchpriority="high"
           sizes="(min-width: 1024px) 50vw, 100vw"
@@ -90,18 +90,18 @@ function onKeydown(event: KeyboardEvent): void {
 .gallery__stage {
   position: relative;
   display: flex;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   border: 1px solid var(--iz-border-soft);
   border-radius: 1.25rem;
-  background: radial-gradient(70% 60% at 50% 45%, rgb(30 104 200 / 0.2), rgb(0 0 0 / 0) 70%), #000;
+  background: #000;
 }
 
 .gallery__stage :deep(img) {
-  max-height: 88%;
-  max-width: 88%;
+  max-height: 90%;
+  max-width: 90%;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -152,8 +152,8 @@ function onKeydown(event: KeyboardEvent): void {
 
 .gallery__thumb {
   display: flex;
-  height: 4.75rem;
-  width: 4.75rem;
+  height: 4.5rem;
+  width: 4.5rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
@@ -173,8 +173,8 @@ function onKeydown(event: KeyboardEvent): void {
 }
 
 .gallery__thumb :deep(img) {
-  max-height: 82%;
-  max-width: 82%;
+  max-height: 80%;
+  max-width: 80%;
   width: auto;
   height: auto;
   object-fit: contain;
